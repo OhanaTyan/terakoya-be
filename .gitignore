@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 登录信息
+src/main/resources/application.yml

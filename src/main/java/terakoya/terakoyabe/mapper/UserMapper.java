@@ -31,10 +31,13 @@ public interface UserMapper {
     @Insert("UPDATE users SET role = #{newRole} WHERE uid = #{uid}")
     void updateUserRole(int uid, int newRole);
 
-    @Select("SELECT * FROM users WHERE username LIKE CONCAT('%', #{keyword}, '%')  ORDER BY username LIMIT #{size} OFFSET #{offset}")
+    @Select("SELECT * FROM users WHERE username LIKE CONCAT(#{keyword}, '%')  ORDER BY username LIMIT #{size} OFFSET #{offset}")
     List<User> getUserList(int offset, int size, String keyword);
 
     @Select("SELECT COUNT(*) FROM users WHERE username LIKE CONCAT('%', #{keyword}, '%')")
     int getPostCountByUser(String keyword);
+
+    @Select("SELECT * FROM users WHERE uid = #{uid}")
+    User getUserById(int uid);
 
 }

@@ -19,16 +19,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import terakoya.terakoyabe.mapper.UserMapper;
+import terakoya.terakoyabe.setting.Setting;
+import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.User;
 
-// TODO: 应该让所有可以操作用户名的操作都让一个 synchronize 方法，防止并发问题
-
 @RestController
-@CrossOrigin(origins = "http://localhost:5173/", maxAge = 3600, allowCredentials = "true")
+@CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
 @RequestMapping("/user")
 public class UserController {
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    UserService userService;
 
 
     // 服务器内部错误
@@ -77,6 +79,10 @@ public class UserController {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Set-Cookie", "uid=" + user.getUid() + "; path=/; Max-Age=3600");
                 headers.add("Set-Cookie", "token=" + token + "; path=/; Max-Age=3600");
+                // 打印登录信息
+                System.out.println("登录成功，用户：" + user.toString());
+                // 打印 token 信息
+                System.out.println("生成 token：" + token);
                 return ResponseEntity.ok().headers(headers).body(new LoginResponse(user.getUid(), token));
             }
         } catch(Exception e){
@@ -113,12 +119,15 @@ public class UserController {
     }
 
     static public boolean isPasswordValid(String password){
+        // TODO:完善密码验证规则
         return true;
     }
 
     static synchronized public void insertUser(UserMapper userMapper, String username, String password){
         userMapper.insertUser(username, password, 1);
     }
+
+ 
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody LoginRequest data) {
@@ -158,8 +167,8 @@ public class UserController {
     // 登出
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-        @CookieValue(name="uid") int uid,
-        @CookieValue(name="token") String token,
+    //    @CookieValue(name="uid") int uid,
+     //   @CookieValue(name="token") String token,
         HttpServletResponse response
     )
     {
@@ -179,8 +188,8 @@ public class UserController {
     @PostMapping("/updateAuth")
     public ResponseEntity<?> updateAuth(
         @RequestBody LoginRequest data,
-        @CookieValue(name="uid") int uid,
-        @CookieValue(name="token") String token
+        @CookieValue(name="uid",  required=false) int uid,
+        @CookieValue(name="token", required=false) String token
     )
     {
         try {
@@ -189,6 +198,7 @@ public class UserController {
             if (!TokenController.verifyToken(uid, token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
             String username = data.getUsername();
             String password = data.getPassword();
             // 验证用户名是否存在
@@ -228,8 +238,8 @@ public class UserController {
     public ResponseEntity<?> updateRole(
         @RequestBody String userid,
         @RequestBody String role,
-        @CookieValue(name="uid") int authid,
-        @CookieValue(name="token") String token
+        @CookieValue(name="uid", required=false) int authid,
+        @CookieValue(name="token", required=false) String token
     )
     {
         try {
@@ -237,12 +247,14 @@ public class UserController {
             if (!TokenController.verifyToken(authid, token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            // 验证用户权限是否为管理员
+            if (!userService.isAdmin(authid)){
+                return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
+            }
+
             int uid = Integer.parseInt(userid);
             int newRole = Integer.parseInt(role);
             // 验证权限是否合法
-            if (newRole != 1 && newRole != 2){
-                return ResponseEntity.status(400).body(new ErrorResponse("权限不合法"));
-            }
             // 修改用户权限
             userMapper.updateUserRole(uid, newRole);
 
@@ -268,12 +280,11 @@ public class UserController {
     // 管理后台用户
     @PostMapping("/list")
     public ResponseEntity<?> list(
-//        @RequestBody String page,
-//        @RequestBody String keyword,
-
         @RequestBody UserListRequest data,
-        @CookieValue(name="uid") int authid,
-        @CookieValue(name="token") String token
+        // @RequestBody int page,
+        // @RequestBody(required=false) String keyword,
+        @CookieValue(name="uid", required=false) int authid,
+        @CookieValue(name="token", required = false) String token
     )
     {
         try {
@@ -281,19 +292,29 @@ public class UserController {
             if (!TokenController.verifyToken(authid, token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            // 验证用户权限是否为管理员
+            if (!userService.isAdmin(authid)){
+                return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
+            }
+
             int page = data.getPage();
             String keyword = data.getKeyword();
+
+            if (keyword == null){
+                keyword = "";
+            }
+
             // 一页50条
             int size = 50;
             int offset = (page - 1) * size;
             List<User> users = userMapper.getUserList(offset, size, keyword);
 
 
-            UserListResponse request = new UserListResponse();
-            request.setPostCount(userMapper.getPostCountByUser(keyword));
-            request.setUsers(users);
+            UserListResponse response = new UserListResponse();
+            response.setPostCount(userMapper.getPostCountByUser(keyword));
+            response.setUsers(users);
 
-            return ResponseEntity.ok(request);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return serverError(e);
         }

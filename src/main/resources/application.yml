@@ -3,7 +3,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://43.143.171.43:5432/postgres
     username: postgres
-    password: postgres_terakoya
+    password: terakoya_postgres
+
 
 server:
   port: 9999

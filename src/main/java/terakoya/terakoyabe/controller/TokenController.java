@@ -1,10 +1,17 @@
 package terakoya.terakoyabe.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import terakoya.terakoyabe.mapper.UserMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class TokenController {
-    // id -> token 
+    // id -> token
+
+    @Autowired
+    UserMapper userMapper;
+
     private static Map<String, String> tokenMap;
 
     static{
@@ -34,6 +41,7 @@ public class TokenController {
     }
 
     public static boolean verifyToken(int uid, String token) throws Exception{
+        
         System.out.println(uid);
         System.out.println(token);
         String uidStr = Integer.toString(uid);
@@ -52,4 +60,6 @@ public class TokenController {
             tokenMap.remove(uid);
         }
     }
-} 
+}
+
+    

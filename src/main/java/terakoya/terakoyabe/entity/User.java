@@ -10,4 +10,8 @@ public class User {
     private String username;
     private String password;
     private int role;
+
+    public String toString() {
+        return "User [uid=" + uid + ", username=" + username + ", password=" + password + ", role=" + role + "]";
+    }
 }

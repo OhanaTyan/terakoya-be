@@ -61,16 +61,7 @@ public class PostController {
         int pid;
     }
 
-    // 生成一个10位的随机字符串
-    private String generateRandomString(int length) {
-        String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * chars.length());
-            sb.append(chars.charAt(index));
-        }
-        return sb.toString();
-    }
+    
 
 
     synchronized static private void insertPost(PostMapper postMapper, int releaseTime, int randomValue,int posterid, int board, String title, String content) {

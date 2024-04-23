@@ -12,10 +12,10 @@ public class TokenController {
     @Autowired
     UserMapper userMapper;
 
-    private static Map<String, String> tokenMap;
+    private static final Map<String, String> tokenMap;
 
     static{
-        tokenMap = new HashMap<String, String>();
+        tokenMap = new HashMap<>();
     }
 
     // 获取长度为10的随机字母字符串

@@ -16,10 +16,6 @@ public interface UserMapper {
     @Select("SELECT * FROM users WHERE username = #{username}")
     User getUserByUsername(String username);
 
-    // 获取id最大的用户的id
-    @Select("SELECT MAX(uid) FROM users")
-    Integer getMaxId();
-
     // 增加新用户
     @Insert("INSERT INTO users (uid, username, password, role) SELECT COALESCE(MAX(uid), 0)+1, #{username}, #{password}, #{role} FROM users")
     void insertUser(String username, String password, int role);

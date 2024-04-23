@@ -127,7 +127,6 @@ public class PostController {
 
 
             int releaseTime = (int) (System.currentTimeMillis() / 1000);
-            String postToken = generateRandomString(10);
 
             int randomValue = (int) (Math.random() * 1000000000);
             

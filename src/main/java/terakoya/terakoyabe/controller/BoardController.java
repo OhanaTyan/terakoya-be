@@ -18,7 +18,7 @@ import lombok.Data;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Board;
 import terakoya.terakoyabe.mapper.BoardMapper;
-import terakoya.terakoyabe.setting.*;;
+import terakoya.terakoyabe.setting.*;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")

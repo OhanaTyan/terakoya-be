@@ -16,11 +16,7 @@ public class BoardServiceImpl implements BoardService {
     public boolean isBoardExists(int id) {
         Board board = boardMapper.findByID(id);
 
-        if (board == null) {
-            return false;
-        }
-
-        return true;
+        return board != null;
     }
 
    

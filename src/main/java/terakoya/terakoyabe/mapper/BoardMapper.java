@@ -17,9 +17,6 @@ public interface BoardMapper {
     @Select("SELECT * FROM boards WHERE name = #{name}")
     Board findByName(String name);
 
-    @Select("SELECT COUNT(*) FROM boards")
-    int countAll();
-
     @Select("SELECT * FROM boards")
     List<Board> listAll();
 

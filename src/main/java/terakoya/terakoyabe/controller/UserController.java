@@ -96,7 +96,7 @@ public class UserController {
         // 是由大小写英文字母、数字、汉字、特殊字符组成的字符串
         // 不含有空格
         // 字符串不能只有数字
-        if (username == null || username.length() < 1 || username.length() > 15){
+        if (username == null || username.isEmpty() || username.length() > 15){
             return false;
         }
 
@@ -110,12 +110,8 @@ public class UserController {
                 isAllNumber = false;
             }  
         }
-
-        if (isAllNumber) {
-            return false;
-        }
-
-        return true;
+        // 如果字符串全部是数字，则返回 false，否则返回 true
+        return !isAllNumber;
     }
 
     static public boolean isPasswordValid(String password){

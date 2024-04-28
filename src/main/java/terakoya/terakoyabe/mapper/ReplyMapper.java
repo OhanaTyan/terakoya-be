@@ -14,7 +14,7 @@ import terakoya.terakoyabe.entity.Reply;
 public interface ReplyMapper {
 
     @Insert("INSERT INTO replies (id, postid, replytime, replyer, content, likes, dislike)" + 
-            "SELECT COALESCE(MAX(id), 0)+1, #{postid}, #{replytime}, #{replyer}, #{content}, #{likes}, #{dislike}"+
+            "SELECT COALESCE(MAX(id), 0)+1, #{postid}, #{replytime}, #{replyer}, #{content}, #{likes}, #{dislike} "+
             "FROM replies")
     void createReply(int postid, int replytime, int replyer, String content, int likes, int dislike);
 

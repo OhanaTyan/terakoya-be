@@ -107,7 +107,7 @@ public class ReplyController {
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在"));
             }
 
-            int currentTime = MyUtil.getCurrentTime();;
+            int currentTime = MyUtil.getCurrentTime();
             int id = createReply(
                 pid,
                 currentTime,
@@ -224,7 +224,7 @@ public class ReplyController {
         try {
             List<Reply> replies = replyMapper.getLatest();
             // 获取最新回复所在的板块
-            ArrayList<Board> boards = new ArrayList<Board>();
+            ArrayList<Board> boards = new ArrayList<>();
             for (Reply reply : replies){
                 int postid = reply.getPostid();
                 Post post = postService.getPostById(postid);

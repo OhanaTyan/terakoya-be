@@ -4,40 +4,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import static terakoya.terakoyabe.MyUtil.getCurrentTime;
+import static terakoya.terakoyabe.util.Log.getPrintWriter;
 
 @Getter
 @Setter
 public class ServerError {
     String message;
 
-    // log 文件地址
-    private static String LOG_FILE = "/home/ubuntu/terakoya-bg-log.txt";
-
-    private static PrintWriter getPrintWriter(){
-        try {
-            return new PrintWriter(LOG_FILE);
-        } catch (FileNotFoundException e){
-            throw new RuntimeException();
-        }
-    }
-
-    private static String getCurrentTime(){
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        return formatter.format(date);
-    }
-
     public ServerError(Exception e){
-        // TODO: 增加适用于linux的log
-//        e.printStackTrace();
         PrintWriter pw = getPrintWriter();
-        pw.println(getCurrentTime());
+        pw.println("[Error]" + getCurrentTime());
         e.printStackTrace(pw);
-        pw.println('\n');
+        pw.println("\n");
         pw.flush();
-        pw.close();
         message = e.toString();
     }
 }

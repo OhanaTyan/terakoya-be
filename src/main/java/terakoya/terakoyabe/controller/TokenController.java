@@ -2,6 +2,7 @@ package terakoya.terakoyabe.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import terakoya.terakoyabe.mapper.UserMapper;
+import terakoya.terakoyabe.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +43,8 @@ public class TokenController {
 
     public static boolean verifyToken(int uid, String token) throws Exception{
         
-        System.out.println(uid);
-        System.out.println(token);
+        Log.info(Integer.toString(uid));
+        Log.info(token);
         String uidStr = Integer.toString(uid);
         if (tokenMap.get(uidStr) == null){
             return false;

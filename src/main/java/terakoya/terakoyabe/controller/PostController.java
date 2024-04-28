@@ -203,7 +203,6 @@ public class PostController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
-            System.out.println(post.toString());
 
             int pid = post.getId();
             // 验证帖子是否存在

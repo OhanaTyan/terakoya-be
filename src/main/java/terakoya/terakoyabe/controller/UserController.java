@@ -22,6 +22,7 @@ import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.User;
 import terakoya.terakoyabe.util.ErrorResponse;
+import terakoya.terakoyabe.util.Log;
 import terakoya.terakoyabe.util.ServerError;
 
 @RestController
@@ -68,9 +69,9 @@ public class UserController {
                 headers.add("Set-Cookie", "uid=" + user.getUid() + "; path=/; Max-Age=3600");
                 headers.add("Set-Cookie", "token=" + token + "; path=/; Max-Age=3600");
                 // 打印登录信息
-                System.out.println("登录成功，用户：" + user.toString());
+                Log.info("登录成功，用户：" + user.toString());
                 // 打印 token 信息
-                System.out.println("生成 token：" + token);
+                Log.info("生成 token：" + token);
                 return ResponseEntity.ok().headers(headers).body(new LoginResponse(user.getUid(), token));
             }
         } catch(Exception e){
@@ -88,7 +89,7 @@ public class UserController {
             return false;
         }
 
-        System.out.println(username);
+        Log.info(username);
 
         boolean isAllNumber = true;
         for (int i = 0; i < username.length(); i++){

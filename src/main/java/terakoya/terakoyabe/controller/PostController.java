@@ -473,4 +473,15 @@ public class PostController {
             return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
+
+    @PostMapping("/test")
+    public ResponseEntity<?> test(){
+        // 该函数用于测试异常功能是否好用
+        try {
+            replyMapper.deleteReply(-12);
+            return ResponseEntity.ok("test");
+        } catch (Exception e){
+            return ResponseEntity.ok("test");
+        }
+    }
 }

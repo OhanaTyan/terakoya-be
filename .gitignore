@@ -34,3 +34,4 @@ build/
 .vscode/
 
 src/main/resources/application.yml
+out/artifacts/terakoya_be_jar/terakoya-be.jar

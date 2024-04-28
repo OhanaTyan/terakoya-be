@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 
 public class Log {
-    private static final String LOG_FILE = "/home/ubuntu/terakoya-bg-log.txt";
+    private static final String LOG_FILE = "/home/ubuntu/terakoya-be-log.txt";
 
     private static PrintWriter writer;
     public static PrintWriter getPrintWriter(){

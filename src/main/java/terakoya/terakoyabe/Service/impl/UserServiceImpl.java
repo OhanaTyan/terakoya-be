@@ -1,8 +1,10 @@
-package terakoya.terakoyabe.Service;
+package terakoya.terakoyabe.Service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
+
+import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.User;
 import terakoya.terakoyabe.mapper.UserMapper;
 
@@ -19,5 +21,15 @@ public class UserServiceImpl implements UserService {
         } 
         return user.getRole() == 2;
     }
+
+    @Override
+    public int getIdByUsername(String username) {
+        User user = userMapper.getUserByUsername(username);
+        if (user == null){
+            return -1;
+        }
+        return user.getUid();
+    }
+
     
 }

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     // 服务器内部失败
-    ResponseEntity<?> serverError(Exception e){
+    ResponseEntity<?> ServerError(Exception e){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(e.getMessage());
     }
@@ -58,7 +58,7 @@ public class UserController {
                 return ResponseEntity.status(401).body(new ErrorResponse("用户名或密码错误"));
             }
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -73,7 +73,7 @@ public class UserController {
                 return ResponseEntity.ok().body("注册成功");
             }
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -88,7 +88,7 @@ public class UserController {
                 return ResponseEntity.ok().body("测试成功");
             }
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -101,7 +101,7 @@ public class UserController {
             response.addCookie(cookie);
             return ResponseEntity.ok().body("测试成功");
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
     
@@ -115,7 +115,7 @@ public class UserController {
             response.addCookie(cookie);
             return ResponseEntity.ok().body("测试成功");
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 

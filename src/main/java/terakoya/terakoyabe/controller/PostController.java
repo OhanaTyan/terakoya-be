@@ -1,12 +1,14 @@
 package terakoya.terakoyabe.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,11 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.BoardService;
+import terakoya.terakoyabe.Service.PostService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Post;
+import terakoya.terakoyabe.entity.Reply;
 import terakoya.terakoyabe.mapper.PostMapper;
+import terakoya.terakoyabe.mapper.ReplyMapper;
 import terakoya.terakoyabe.setting.Setting;
+import terakoya.terakoyabe.util.ServerError;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -34,12 +41,12 @@ public class PostController {
     @Autowired
     private UserService userService;
 
-    // 服务器内部错误
-    ResponseEntity<?> serverError(Exception e){
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.toString());
-    }
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private ReplyMapper replyMapper;
+
 
     @AllArgsConstructor
     @Data
@@ -62,22 +69,36 @@ public class PostController {
     }
 
     
+    private void insertPost(int releaseTime, int randomValue,int posterid, int board, String title, String content) {
+        do {
+            try {
+                postMapper.insertPost(
+                    releaseTime,
+                    randomValue,
+                    posterid,
+                    board,
+                    title, 
+                    content,
+                    0,
+                    0
+                );
+                break;
+                // 如果提交时撞键，则重新提交
+            } catch (org.springframework.dao.DuplicateKeyException e){
 
+            }
+        } while (true);
 
-    synchronized static private void insertPost(PostMapper postMapper, int releaseTime, int randomValue,int posterid, int board, String title, String content) {
-        postMapper.insertPost(releaseTime, randomValue, posterid, board, title, content, board, randomValue);
     }
 
     // 检查帖子是否存在
-    private boolean isPostExists(int pid) {
-        List<Post> posts = postMapper.getPostById(pid);
-        if (posts.isEmpty()){
-            return false;
-        } else {
-            return true;
-        }
+    // 如果存在则返回该帖子
+    // 否则返回 null
+    private Post getPostById(int pid) {
+        return postService.getPostById(pid);
     }
 
+    
     // 检查帖子是否合法
     private boolean isPostValid(Post post) {
         return isPostValid(post.getTitle(), post.getContent());
@@ -87,6 +108,23 @@ public class PostController {
         // TODO: 添加验证帖子是否合法逻辑
         return true;
     }
+
+    // 通过 releasetime 和 replytime 找到对应的帖子的 id
+    int getPostIdByReleaseTimeAndReplyTime(int releaseTime, int replyTime) {
+        List<Post> posts;
+        do {
+            // 等待 500ms
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e){
+                // do nothing
+            }
+            posts = postMapper.getPostByReleaseTimeAndReplyTime(releaseTime, replyTime);
+        } while (posts.isEmpty());
+        
+        return posts.getFirst().getId();
+    }
+
 
     @RequestMapping("/create")
     public ResponseEntity<?> create(
@@ -111,21 +149,22 @@ public class PostController {
 
             // 检查板块是否存在
             if (!boardService.isBoardExists(board)){
-                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在"));
+                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
 
             // 验证帖子是否合法
+            if (!isPostValid(title, content)){
+                return ResponseEntity.status(400).body(new ErrorResponse("帖子不合法"));
+            }
 
+            int releaseTime = MyUtil.getCurrentTime();
 
-            int releaseTime = (int) (System.currentTimeMillis() / 1000);
+            int randomValue = MyUtil.getRandomValue();
 
-            int randomValue = (int) (Math.random() * 1000000000);
-            
             // 打印调试信息
 
             // 插入数据库
             insertPost(
-                postMapper,
                 releaseTime,
                 randomValue,
                 posterid,
@@ -133,25 +172,16 @@ public class PostController {
                 title,
                 content
             );
-           
-            int i=0;
-            List<Post> posts;
-            do {
-                System.out.println("waiting for reply" + i);
-                i++;
-                // 等待 500ms
-                Thread.sleep(500);
-                posts = postMapper.getPostByReleaseTimeAndReplyTime(releaseTime, randomValue);
-            } while (posts.isEmpty());
 
-            int id = posts.getFirst().getId();
+
+            int id = getPostIdByReleaseTimeAndReplyTime(releaseTime, randomValue);
 
             // 将 id 对应的表的 replytime 设为 releaseTime
             postMapper.updateReplyTime(id, releaseTime);
 
-            return ResponseEntity.ok().body(new CreateResponse(posts.getFirst().getId()));
+            return ResponseEntity.ok().body(new CreateResponse(id));
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
 
     }
@@ -177,19 +207,20 @@ public class PostController {
 
             int pid = post.getId();
             // 验证帖子是否存在
-            if (!isPostExists(pid)){
-                return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在"));
+            if (getPostById(pid) == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
             }
 
             // 验证板块是否存在
             if (!boardService.isBoardExists(post.getBoard())){
-                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在"));
+                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
 
             // 验证帖子是否合法
             if (!isPostValid(post)){
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不合法"));
             }
+
 
             // 更新数据库
             postMapper.updatePost(
@@ -201,10 +232,228 @@ public class PostController {
             
             return ResponseEntity.ok().body(new CreateResponse(post.getId()));
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
-    
-    
+    @AllArgsConstructor
+    @Data
+    public static class DeleteRequest{
+        int pid;
+        // 如果不加下面的字段，会出现无法解析的错误
+        String unused;
+        /*
+        DefaultHandlerExceptionResolver : Resolved [org.springframework.http.
+        converter.HttpMessageNotReadableException: JSON parse error: Cannot
+        construct instance of `terakoya.terakoyabe.controller
+        .PostController$DeleteRequest` (although at least one Creator exists):
+        cannot deserialize from Object value (no delegate- or property-based
+        Creator)]
+         */
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(
+        @RequestBody DeleteRequest data,
+        @CookieValue(name="uid", required = false) int uid,
+        @CookieValue(name="token", required = false) String token 
+    ) 
+    {
+        try {
+            if (!TokenController.verifyToken(uid, token)){
+                return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
+            }
+            // 验证是否是管理员
+            boolean isAdmin = userService.isAdmin(uid);
+
+            int pid = data.getPid();
+
+            Post post = getPostById(pid);
+            // 验证帖子是否存在
+            if (post == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
+            }
+
+            // 验证权限
+            if (!isAdmin){
+                // 如果不是管理员，那么只有发布者自己可以删除帖子
+                if (post.getPosterid() != uid){
+                    return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
+                }
+            }
+            
+
+            postMapper.updatePost(
+                pid,
+                "该帖子已被删除",
+                "该帖子已被删除",
+                -1
+            );
+            // TODO:删除该帖子下的所有回复
+            replyMapper.deleteByPostId(pid);
+            
+            return ResponseEntity.ok().body("删除成功");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ServerError(e));
+        }
+    }
+
+    @AllArgsConstructor
+    @Data
+    public static class GetLatestRequest{
+        Integer bid;
+        Integer page;
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatest(
+        @RequestBody(required = false) GetLatestRequest data
+    )
+    {
+        try {
+            int bid;
+            int page;
+            if (data == null){
+                bid = 0;
+                page = 1;
+            } else {
+                if (data.getBid() == null)  bid = 0;
+                else                        bid = data.getBid();
+                if (data.getPage() == null) page = 1;
+                else                        page = data.getPage();
+            }
+            int size = 50;
+            int offset = (page - 1) * size;
+
+            List<Post> posts;
+            if (bid == 0){
+                // 从所有帖子中查询最新帖子
+                posts = postMapper.getLatestPosts(offset, size);
+            }
+            else {
+                // 检查板块是否存在
+
+                if (!boardService.isBoardExists(bid)){
+                    return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
+                }
+
+                // 从指定板块中查询最新帖子
+                posts = postMapper.getLatestPostsByBoard(bid, offset, size);
+            }
+
+            return ResponseEntity.ok().body(posts);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ServerError(e));
+        }
+    }
+
+    @AllArgsConstructor
+    @Data
+    public static class GetListRequest{
+        int page;
+        Integer bid;
+        String poster;
+        String keyword;
+    }
+
+    @AllArgsConstructor
+    @Data
+    public static class GetListResponse{
+        int postCount;
+        List<Post> posts;
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getList(
+        @RequestBody(required = false) GetListRequest data,
+        @CookieValue(name="uid", required = false) int uid,
+        @CookieValue(name="token", required = false) String token
+    )
+    {  
+        try{
+            // 验证 token
+            if (!TokenController.verifyToken(uid, token)){
+                return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
+            }
+            // 验证是否是管理员
+            if (!userService.isAdmin(uid)){
+                return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
+            }
+
+            int page = data.getPage();
+            int size = 50;
+            int offset = (page - 1) * size;
+            int bid;
+            if (data.getBid() == null){
+                bid = -1;
+            } else {
+                bid = data.getBid();
+            }
+            String poster;
+            if (data.getPoster() == null){
+                poster = "";
+            } else {
+                poster = data.getPoster();
+            }
+            String keyword;
+            if (data.getKeyword() == null){
+                keyword = "";
+            } else {
+                keyword = data.getKeyword();
+            }
+
+            List<Post> posts;
+            
+            posts = postMapper.getPostsByBoardPosterAndKeyword(poster, keyword, offset, size);
+
+            int postCount = postMapper.getPostCountByBoardPosterAndKeyword(bid, poster, keyword);
+
+            return ResponseEntity.ok().body(new GetListResponse(
+                postCount,
+                posts
+            ));
+
+        } catch (Exception e){
+            return ResponseEntity.status(500).body(new ServerError(e));
+        }
+    }
+
+
+    @AllArgsConstructor
+    @Data
+    public static class GetPostResponse{
+        Post post;
+        int replyCount;
+        List<Reply> replies;
+    }
+
+    @GetMapping("/{pid}")
+    public ResponseEntity<?> getPost(
+        @PathVariable("pid") int pid,
+        @RequestBody(required = false) Integer pageInteger
+    )
+    {
+        try {
+            Post post = getPostById(pid);
+            // 检查帖子是否存在
+            if (post == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
+            }
+            int page;
+            page = Objects.requireNonNullElse(pageInteger, 1);
+            int size = 50;
+            int offset = (page - 1) * size;
+            // 获取回复列表内容
+            List<Reply> replies = replyMapper.getReplyByPostId(pid, offset, size);
+
+            return ResponseEntity.ok().body(new GetPostResponse(
+                post, 
+                replies.size(),
+                replies
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ServerError(e));
+        }
+    }
 }

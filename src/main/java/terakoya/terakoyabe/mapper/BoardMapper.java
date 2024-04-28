@@ -2,6 +2,7 @@ package terakoya.terakoyabe.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -26,4 +27,6 @@ public interface BoardMapper {
     @Insert("UPDATE boards SET name = #{name}, description = #{description} WHERE id = #{id}")
     void update(int id, String name, String description);
 
+    @Delete("DELETE FROM boards WHERE id = #{id}")
+    void deleteBoard(int id);
 }

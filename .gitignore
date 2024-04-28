@@ -4,8 +4,6 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-# 登录信息
-*.yml
 
 ### STS ###
 .apt_generated
@@ -35,3 +33,4 @@ build/
 ### VS Code ###
 .vscode/
 
+src/main/resources/application.yml

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,6 +21,8 @@ import terakoya.terakoyabe.mapper.UserMapper;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.User;
+import terakoya.terakoyabe.util.ErrorResponse;
+import terakoya.terakoyabe.util.ServerError;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -32,19 +33,6 @@ public class UserController {
     @Autowired
     UserService userService;
 
-
-    // 服务器内部错误
-    ResponseEntity<?> serverError(Exception e){
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.toString());
-    }
-
-    @AllArgsConstructor
-    @Data
-    public static class ErrorResponse{
-        String message;
-    }
 
     @Data
     public static class LoginRequest {
@@ -86,7 +74,7 @@ public class UserController {
                 return ResponseEntity.ok().headers(headers).body(new LoginResponse(user.getUid(), token));
             }
         } catch(Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -119,8 +107,15 @@ public class UserController {
         return true;
     }
 
-    static synchronized public void insertUser(UserMapper userMapper, String username, String password){
-        userMapper.insertUser(username, password, 1);
+    public void insertUser(String username, String password){
+        do{
+            try { 
+                userMapper.insertUser(username, password, 1);
+                break;
+            } catch (org.springframework.dao.DuplicateKeyException e){
+                continue;
+            }
+        } while (true);
     }
 
  
@@ -150,13 +145,13 @@ public class UserController {
                 if (!isPasswordValid(password)){
                     return ResponseEntity.status(400).body(new ErrorResponse("密码不满足设定条件"));
                 }
-                insertUser(userMapper, username, password);
+                insertUser(username, password);
                 // userMapper.insertUser(username, password, 1);
-                
+                   
                 return ResponseEntity.ok("注册成功");
             }
         } catch(Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -176,7 +171,7 @@ public class UserController {
             // 登出成功
             return ResponseEntity.ok("登出成功");
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -225,7 +220,7 @@ public class UserController {
             // 增加 Access-Control-Allow-Credentials 头信息，允许跨域请求携带 cookie
             return ResponseEntity.ok().body("权限修改成功");
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -257,7 +252,7 @@ public class UserController {
             return ResponseEntity.ok("权限修改成功");
 
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -277,8 +272,6 @@ public class UserController {
     @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody UserListRequest data,
-        // @RequestBody int page,
-        // @RequestBody(required=false) String keyword,
         @CookieValue(name="uid", required=false) int authid,
         @CookieValue(name="token", required = false) String token
     )
@@ -300,8 +293,7 @@ public class UserController {
                 keyword = "";
             }
 
-            // 一页50条
-            int size = 50;
+            int size = 20;
             int offset = (page - 1) * size;
             List<User> users = userMapper.getUserList(offset, size, keyword);
 
@@ -312,7 +304,7 @@ public class UserController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 

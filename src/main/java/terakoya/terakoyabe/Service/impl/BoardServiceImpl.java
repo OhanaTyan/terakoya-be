@@ -1,8 +1,9 @@
-package terakoya.terakoyabe.Service;
+package terakoya.terakoyabe.Service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import terakoya.terakoyabe.Service.BoardService;
 import terakoya.terakoyabe.entity.Board;
 import terakoya.terakoyabe.mapper.BoardMapper;
 
@@ -19,5 +20,13 @@ public class BoardServiceImpl implements BoardService {
         return board != null;
     }
 
+    @Override
+    public Board getBoardById(int id) {
+        Board board = boardMapper.findByID(id);
+
+        return board;
+    }
+
+    
    
 }

@@ -3,7 +3,6 @@ package terakoya.terakoyabe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,7 +17,9 @@ import lombok.Data;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Board;
 import terakoya.terakoyabe.mapper.BoardMapper;
+import terakoya.terakoyabe.mapper.PostMapper;
 import terakoya.terakoyabe.setting.*;
+import terakoya.terakoyabe.util.ServerError;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -28,13 +29,10 @@ public class BoardController {
     BoardMapper boardMapper;
 
     @Autowired
-    UserService userService;
+    PostMapper postMapper;
 
-    ResponseEntity<?> serverError(Exception e){
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.toString());
-    }
+    @Autowired
+    UserService userService;
 
 
     @AllArgsConstructor
@@ -84,7 +82,7 @@ public class BoardController {
 
             return ResponseEntity.ok().body(new CreateResponse(id));
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -109,7 +107,7 @@ public class BoardController {
             // 验证是否存在该板块
             Board oldBoard = boardMapper.findByID(board.getId());
             if (oldBoard == null){
-                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在"));
+                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
             // 验证板块名字是否存在
             if (boardMapper.findByName(board.getName())!= null){
@@ -131,7 +129,7 @@ public class BoardController {
             return ResponseEntity.ok().body(null);
             
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }   
 
@@ -143,10 +141,31 @@ public class BoardController {
     )
     {
         try {
-            // TODO: 实现删除板块功能
-            return ResponseEntity.ok().body(null);
+            // 验证 token
+            if (!TokenController.verifyToken(uid, token)){
+                return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
+            }
+
+            // 验证是否是管理用户
+            if (!userService.isAdmin(uid)){
+                return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
+            }
+
+            int boardId = board.getId();
+
+            // 验证是否存在该板块
+            Board oldBoard = boardMapper.findByID(boardId);
+            if (oldBoard == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
+            }
+            // 清除板块
+            boardMapper.deleteBoard(board.getId());
+            // 将该板块下的所有帖子的 postid 改为 0
+            postMapper.updateBoardToZero(boardId);
+
+            return ResponseEntity.ok().body("删除成功");
         } catch (Exception e) {
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 
@@ -176,7 +195,7 @@ public class BoardController {
             return ResponseEntity.ok().body(new ListRequest(boardCount, boards));
 
         } catch (Exception e){
-            return serverError(e);
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 

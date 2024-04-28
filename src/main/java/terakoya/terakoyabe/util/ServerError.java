@@ -9,6 +9,7 @@ public class ServerError {
     String message;
 
     public ServerError(Exception e){
+        // TODO: 增加适用于linux的log
         e.printStackTrace();
         message = e.toString();
     }

@@ -25,27 +25,14 @@ public interface PostMapper {
     @Update("UPDATE posts SET replytime = #{replyTime} WHERE id = #{id}")
     void updateReplyTime(int id, int replyTime);
 
-    // 将帖子除 id 外的字段均改为 -1 或空串
-    @Update("UPDATE posts SET title = '', content = '', board = -1 WHERE id = #{id}")
-    void deletePostContent(int id);
 
     @Update("UPDATE posts SET title = #{title}, content = #{content}, board = #{board} WHERE id = #{id}")
     void updatePost(int id, String title, String content, int board);
 
-    // 验证某个帖子是否是某个用户发的
-    @Insert("SELECT * FROM posts WHERE id = #{pid} AND posterid = #{posterid}")
-    List<Post> getPostByIdAndPosterId(int pid, int posterid);
 
     // 批量将 board 为 boardId 的帖子的 board 改为 0
     @Update("UPDATE posts SET board = 0 WHERE board = #{boardId}")
     void updateBoardToZero(int boardId);
-
-    @Delete("DELETE FROM posts WHERE id = #{pid}")
-    void deletePost(int pid);
-
-    // 更新某个帖子的最新时间
-    @Update("UPDATE posts SET replytime = #{replytime} WHERE id = #{id}")
-    void updatePostReplyTime(int id, int replytime);
 
     @Select("SELECT * FROM posts ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPosts(int offset, int size);
@@ -54,7 +41,7 @@ public interface PostMapper {
     List<Post> getLatestPostsByBoard(int boardId,  int offset, int size);
 
     @Select(
-        "SELECT COUNT(*) FROM posts"+
+        "SELECT COUNT(*) FROM posts "+
             "WHERE "+
                 "((#{bid} == -1) OR (board == #{bid}) )" +
                 "AND "+
@@ -77,7 +64,7 @@ public interface PostMapper {
 
 
     @Select(
-        "SELECT * FROM posts"+
+        "SELECT * FROM posts "+
             "WHERE "+
                 "((#{bid} == -1) OR (board == #{bid}) )" +
                 "AND "+

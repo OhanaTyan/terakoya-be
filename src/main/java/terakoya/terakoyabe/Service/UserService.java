@@ -7,6 +7,5 @@ public interface UserService {
 
     boolean isAdmin(int uid);
 
-    int getIdByUsername(String username);
 
 }

@@ -22,5 +22,14 @@ public class UserServiceImpl implements UserService {
         return user.getRole() == 2;
     }
 
+    @Override
+    public int getUserIdByUsername(String poster) {
+        User user = userMapper.getUserByUsername(poster);
+        if (user == null){
+            return -1;
+        }
+        return user.getUid();
+    }
+
     
 }

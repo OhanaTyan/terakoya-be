@@ -28,7 +28,7 @@ public interface ReplyMapper {
     @Update("UPDATE replies SET content = #{content} WHERE id = #{rid}")
     void updateContent(int rid, String content);
 
-    @Select("SELECT * FROM replies WHERE postid = #{postid} ORDER BY replytime ASC LIMIT #{size} OFFSET #{offset}")
+    @Select("SELECT * FROM replies WHERE postid = #{postid} ORDER BY replytime LIMIT #{size} OFFSET #{offset}")
     List<Reply> getReplyByPostId(int postid, int offset, int size);
 
     @Delete("DELETE FROM replies WHERE postid = #{postId}")
@@ -42,4 +42,20 @@ public interface ReplyMapper {
 
     @Select("SELECT * FROM replies ORDER BY replytime DESC LIMIT 15")
     List<Reply> getLatest();
+
+    @Select("SELECT * FROM replies "+
+            "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset} ")
+    List<Reply> getAllReplies(int offset, int size);
+
+    @Select("SELECT COUNT(*) FROM replies ")
+    int getReplyCount();
+
+    @Select("SELECT * FROM replies WHERE replyer = #{posterid} " +
+            "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset} ")
+    List<Reply> getRepliesByPoster(int posterid, int offset, int size);
+
+    @Select("SELECT COUNT(*) FROM replies WHERE replyer = #{posterid} " )
+    int getReplyCountByPosterid(int posterid);
+
+
 }

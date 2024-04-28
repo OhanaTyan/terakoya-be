@@ -40,50 +40,35 @@ public interface PostMapper {
     @Select("SELECT * FROM posts WHERE board = #{boardId} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPostsByBoard(int boardId,  int offset, int size);
 
+    String sql =
+       "WHERE "+
+                    "((#{bid} = -1) OR (board = #{bid}) )" +
+                "AND "+
+                    "((#{posterid} = -1) OR (posterid = #{posterid})) "+
+                "AND "+
+                    "( "+ // keyword 是空串
+                        "(LENGTH(#{keyword}) = 0) "+
+                    "OR "+
+                        "(title LIKE CONCAT('%', #{keyword}, '%')) "+
+                    "OR "+
+                        "(content LIKE CONCAT('%', #{keyword}, '%')) "+
+                    ") ";
+
+ 
+
     @Select(
         "SELECT COUNT(*) FROM posts "+
-            "WHERE "+
-                "((#{bid} == -1) OR (board == #{bid}) )" +
-                "AND "+
-                "( "+
-                    "(posterid = #{poster}) "+
-                    "OR "+
-                    "(" +
-                        "posterid "+
-                        "IN " + 
-                        "("+
-                            "SELECT uid from users WHERE username LIKE CONCAT('%', #{poster}, '%')"+
-                        ")"+
-                    ") "+
-                ") "+
-                "AND "+
-                    "(title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%')) "
-
+        sql
     )
-    int getPostCountByBoardPosterAndKeyword(int bid, String poster, String keyword);
+    int getPostCountByBoardPosterAndKeyword(int bid, int posterid, String keyword);
 
 
     @Select(
         "SELECT * FROM posts "+
-            "WHERE "+
-                "((#{bid} == -1) OR (board == #{bid}) )" +
-                "AND "+
-                "( "+
-                    "(posterid = #{poster}) "+
-                    "OR "+
-                    "(" +
-                        "posterid "+
-                        "IN " + 
-                        "("+
-                            "SELECT uid from users WHERE username LIKE CONCAT('%', #{poster}, '%') "+
-                        ")"+
-                    ") "+
-                ") "+
-                "AND "+
-                    "(title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%')) "+
+        sql +
         "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}"
 
     )
-    List<Post> getPostsByBoardPosterAndKeyword(String poster, String keyword, int offset, int size);
+    List<Post> getPostsByBoardPosterAndKeyword(int bid, int posterid, String keyword, int offset, int size);
 }
 

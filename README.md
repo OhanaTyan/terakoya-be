@@ -76,6 +76,7 @@ void press_dislike() {
 - 修改回复
 - 删除回复
 
+- 最新回复
 
 改了一些接口
 - 帖子创建只需要传入`title` `content` `board`即可，其余字段会自动生成

@@ -289,7 +289,6 @@ public class PostController {
                 "该帖子已被删除",
                 -1
             );
-            // TODO:删除该帖子下的所有回复
             replyMapper.deleteByPostId(pid);
             
             return ResponseEntity.ok().body("删除成功");
@@ -364,7 +363,7 @@ public class PostController {
         List<Post> posts;
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<?> getList(
         @RequestBody(required = false) GetListRequest data,
         @CookieValue(name="uid", required = false) int uid,
@@ -391,10 +390,18 @@ public class PostController {
                 bid = data.getBid();
             }
             String poster;
+            int posterid;
             if (data.getPoster() == null){
-                poster = "";
+                posterid = -1;
             } else {
                 poster = data.getPoster();
+                // 如果 poster 全部由数字组成
+                if (poster.matches("\\d+")) {
+                    posterid = Integer.parseInt(poster);
+                } else {
+                    // 如果 poster 不是数字，则认为是用户名
+                    posterid = userService.getUserIdByUsername(poster);
+                }
             }
             String keyword;
             if (data.getKeyword() == null){
@@ -405,9 +412,19 @@ public class PostController {
 
             List<Post> posts;
             
-            posts = postMapper.getPostsByBoardPosterAndKeyword(poster, keyword, offset, size);
+            posts = postMapper.getPostsByBoardPosterAndKeyword(
+                bid,
+                posterid,
+                keyword,
+                offset,
+                size
+            );
 
-            int postCount = postMapper.getPostCountByBoardPosterAndKeyword(bid, poster, keyword);
+            int postCount = postMapper.getPostCountByBoardPosterAndKeyword(
+                bid,
+                posterid,
+                keyword
+            );
 
             return ResponseEntity.ok().body(new GetListResponse(
                 postCount,

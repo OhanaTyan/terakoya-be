@@ -3,6 +3,7 @@ package terakoya.terakoyabe.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Arg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -210,6 +211,73 @@ public class ReplyController {
             return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
+
+    @AllArgsConstructor
+    @Data
+    public static class GetListRequest{
+        int page;
+        String poster;
+    }
+    
+    @AllArgsConstructor
+    @Data
+    private static class GetListResponse{
+        int postCount;
+        List<Reply> replys;
+    }
+
+
+    @PostMapping("/list")
+    public ResponseEntity<?> list(
+        @RequestBody GetListRequest data,
+        @CookieValue(name="uid", required = false) int uid,
+        @CookieValue(name="token", required = false) String token
+    )
+    {
+        try {
+            // 验证token
+            if (!TokenController.verifyToken(uid, token)) {
+                return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
+            }
+            // 验证是否是管理员
+            if (!userService.isAdmin(uid)){
+                return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
+            }
+            int page = data.getPage();
+            String poster = data.getPoster();
+            int posterid = -1;
+            String keyword = "";
+            int size = 50;
+            int offset = (page - 1) * size;
+            int replyCount = 0;
+            List<Reply> replies;
+            if (poster == null || poster.isEmpty()){
+                // 获取所有回复
+                replies = replyMapper.getAllReplies(offset, size);
+                replyCount = replyMapper.getReplyCount();
+            } else {
+                // 如果 poster 全部由数字组成
+                if (poster.matches("^\\d+$")){
+                    posterid = Integer.parseInt(poster);
+                    replies = replyMapper.getRepliesByPoster(posterid, offset, size);
+                    replyCount = replyMapper.getReplyCountByPosterid(posterid);
+                } else {
+                    posterid = userService.getUserIdByUsername(poster);
+                    if (posterid == -1){
+                        replies = replyMapper.getAllReplies(offset, size);
+                        replyCount = replyMapper.getReplyCount();
+                    } else {
+                        replies = replyMapper.getRepliesByPoster(posterid, offset, size);
+                        replyCount = replyMapper.getReplyCountByPosterid(posterid);
+                    }
+                }
+            }
+            return ResponseEntity.ok().body(new GetListResponse(replyCount, replies));
+        } catch (Exception e){
+            return ResponseEntity.status(500).body(new ServerError(e));
+        }
+    }
+
 
     @AllArgsConstructor
     @Data

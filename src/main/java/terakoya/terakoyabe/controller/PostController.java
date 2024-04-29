@@ -498,7 +498,7 @@ public class PostController {
 
     @PostMapping("/test")
     public ResponseEntity<?> test(){
-        // 该函数用于测试异常功能是否好用
+        // 该函数用于测试log功能是否好用
         try {
             Integer i = null;
             int ii = i;

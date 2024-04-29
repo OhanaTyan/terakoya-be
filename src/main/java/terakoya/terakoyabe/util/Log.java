@@ -1,7 +1,7 @@
 package terakoya.terakoyabe.util;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -9,36 +9,77 @@ import java.time.format.DateTimeFormatter;
 public class Log {
     private static final String LOG_FILE = "/home/ubuntu/terakoya-be-log.txt";
 
-    private static PrintWriter writer;
-    public static PrintWriter getPrintWriter(){
+    private static FileWriter writer;
+
+    // 获取进程号
+    private static long getPid(){
+        // https://blog.csdn.net/mingtianhaiyouwo/article/details/75132106
+        return ManagementFactory.getRuntimeMXBean().getPid();
+    }
+
+    public static FileWriter getFileWriter() {
         try {
             if (writer == null) {
-                writer = new PrintWriter(LOG_FILE);
+                writer = new FileWriter(LOG_FILE, true);
+                // terakoya 的 ascii 画
+                writer.write("\n  _______             _                      \n |__   __|           | |                     \n    | | ___ _ __ __ _| | _____  _   _  __ _  \n    | |/ _ \\ '__/ _` | |/ / _ \\| | | |/ _` | \n    | |  __/ | | (_| |   < (_) | |_| | (_| | \n    |_|\\___|_|  \\__,_|_|\\_\\___/ \\__, |\\__,_| \n                                 __/ |       \n                                |___/      \n");
+/*
+  _______             _
+ |__   __|           | |
+    | | ___ _ __ __ _| | _____  _   _  __ _
+    | |/ _ \ '__/ _` | |/ / _ \| | | |/ _` |
+    | |  __/ | | (_| |   < (_) | |_| | (_| |
+    |_|\___|_|  \__,_|_|\_\___/ \__, |\__,_|
+                                 __/ |
+                                |___/
+ */
+                // TODO:写入进程号和当前时间
+                info("运行成功");
+                info("当前进程号为pid=" + getPid());
+                info("当前时间为" + getCurrentTimeString());
             }
             return writer;
-        } catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             throw new RuntimeException();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
-    public static String getCurrentTime(){
+
+    public static String getCurrentTimeString(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime dateTime = LocalDateTime.now();
         return dateTime.format(formatter);
     }
 
     public static void info(String s){
-        PrintWriter writer = getPrintWriter();
-        writer.println("[info]" + getCurrentTime());
-        writer.println(s);
-        writer.println('\n');
-        writer.flush();
+        try {
+            FileWriter writer = getFileWriter();
+            writer.write("[info]" + getCurrentTimeString() + "\n");
+            writer.write(s + "\n");
+            writer.flush();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public static void error(String s){
-        PrintWriter writer = getPrintWriter();
-        writer.println("[Error]" + getCurrentTime());
-        writer.println(s);
-        writer.println('\n');
-        writer.flush();
+        try {
+            FileWriter writer = getFileWriter();
+            writer.write("[Error]" + getCurrentTimeString() + "\n");
+            writer.write(s + "\n");
+            writer.flush();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void error(Exception e){
+            // https://blog.csdn.net/godha/article/details/13066095
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String msg = sw.toString();
+            error(msg);
     }
 }

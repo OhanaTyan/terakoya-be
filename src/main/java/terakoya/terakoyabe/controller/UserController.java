@@ -1,28 +1,20 @@
 package terakoya.terakoyabe.controller;
 
 
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
-
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import terakoya.terakoyabe.mapper.UserMapper;
-import terakoya.terakoyabe.setting.Setting;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.User;
+import terakoya.terakoyabe.mapper.UserMapper;
+import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ErrorResponse;
 import terakoya.terakoyabe.util.ServerError;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -61,15 +53,12 @@ public class UserController {
                 // 生成 token
                 String token = TokenController.generateToken(user.getUid());
                 // 将 token 写入 session
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Access-Control-Allow-Credentials", "true");
-
                 session.setAttribute("token", token);
                 // 打印登录信息
                 System.out.println("登录成功，用户：" + user.toString());
                 // 打印 token 信息
                 System.out.println("生成 token：" + token);
-                return ResponseEntity.ok().headers(headers).body(new LoginResponse(user.getUid(), token));
+                return ResponseEntity.ok().body(new LoginResponse(user.getUid(), token));
             }
         } catch(Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));

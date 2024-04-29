@@ -1,14 +1,10 @@
 package terakoya.terakoyabe.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.BoardService;
 import terakoya.terakoyabe.Service.PostService;
@@ -20,6 +16,9 @@ import terakoya.terakoyabe.mapper.ReplyMapper;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ErrorResponse;
 import terakoya.terakoyabe.util.ServerError;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -76,18 +75,19 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class CreateRequest{
-        private Integer pid;
-        private String content;
+        Integer pid;
+        String  content;
+        String  token;
     }
 
     // 创建回复
     @PostMapping("/create")
     public ResponseEntity<?> create(
-        @RequestBody CreateRequest data,
-        @RequestBody String token
+        @RequestBody CreateRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证token
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -135,7 +135,8 @@ public class ReplyController {
     @Data
     public static class EditRequest{
         Integer rid;
-        String content;
+        String  content;
+        String  token;
     }
 
     public boolean isReplyExists(int rid){
@@ -149,11 +150,11 @@ public class ReplyController {
 
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
-        @RequestBody EditRequest editRequest,
-        @RequestBody String token  
+        @RequestBody EditRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证token
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
@@ -171,12 +172,12 @@ public class ReplyController {
             }
 
             int rid;
-            if (editRequest.getRid() == null){
+            if (data.getRid() == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 rid"));
             } else {
-                rid = editRequest.getRid();
+                rid = data.getRid();
             }
-            String content = editRequest.getContent();
+            String content = data.getContent();
 
             // 检查内容是否为空
             if (content == null || content.isEmpty()){
@@ -195,15 +196,16 @@ public class ReplyController {
     @Data
     public static class DeleteRequest{
         Integer rid;
+        String  token;
     }
 
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
-        @RequestBody DeleteRequest data,
-        @RequestBody String token
+        @RequestBody DeleteRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证token
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
@@ -240,7 +242,8 @@ public class ReplyController {
     @Data
     public static class GetListRequest{
         Integer page;
-        String poster;
+        String  poster;
+        String  token;
     }
     
     @AllArgsConstructor
@@ -253,11 +256,11 @@ public class ReplyController {
 
     @PostMapping("/list")
     public ResponseEntity<?> list(
-        @RequestBody GetListRequest data,
-        @RequestBody String token
+        @RequestBody GetListRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证token
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    

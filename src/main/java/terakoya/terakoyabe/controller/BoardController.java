@@ -1,25 +1,18 @@
 package terakoya.terakoyabe.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Board;
 import terakoya.terakoyabe.mapper.BoardMapper;
 import terakoya.terakoyabe.mapper.PostMapper;
-import terakoya.terakoyabe.setting.*;
+import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ServerError;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -54,11 +47,11 @@ public class BoardController {
     
     @PostMapping("/create")
     public ResponseEntity<?> create(
-        @RequestBody Board board,
-        @RequestBody String token
+        @RequestBody MyBoard data
     )
     {
         try {
+            String token = data.getToken();
             // 验证用户身份
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -69,16 +62,16 @@ public class BoardController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
             // 检查是否已有板块名字与传入板块相同
-            if (isBoardNameExists(board.getName())){
+            if (isBoardNameExists(data.getName())){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块名字已存在"));
             }
 
             boardMapper.create(
-                board.getName(),
-                board.getDescription()
+                data.getName(),
+                data.getDescription()
             );
             
-            int id = boardMapper.findByName(board.getName()).getId();
+            int id = boardMapper.findByName(data.getName()).getId();
 
             return ResponseEntity.ok().body(new CreateResponse(id));
         } catch (Exception e){
@@ -93,15 +86,16 @@ public class BoardController {
         Integer id;
         String  name;
         String  description;
+        String  token;
     }
 
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
-        @RequestBody MyBoard data,
-        @SessionAttribute(name="token") String token
+        @RequestBody MyBoard data
     )
     {
         try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -158,11 +152,11 @@ public class BoardController {
 
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
-        @RequestBody MyBoard data,
-        @RequestBody String token
+        @RequestBody MyBoard data
     )
     {
-        try {
+       try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));

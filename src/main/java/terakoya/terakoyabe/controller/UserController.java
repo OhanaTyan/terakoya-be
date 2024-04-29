@@ -28,8 +28,9 @@ public class UserController {
 
     @Data
     public static class LoginRequest {
-        String username;
-        String password;
+        String  username;
+        String  password;
+        String  token;
     }
 
     @AllArgsConstructor
@@ -52,6 +53,8 @@ public class UserController {
             } else {
                 // 生成 token
                 String token = TokenController.generateToken(user.getUid());
+                // 将 token 写入 session
+                session.setAttribute("token", token);
                 // 打印登录信息
                 System.out.println("登录成功，用户：" + user.toString());
                 // 打印 token 信息
@@ -159,12 +162,11 @@ public class UserController {
     // 信息修改
     @PostMapping("/updateAuth")
     public ResponseEntity<?> updateAuth(
-        @RequestBody LoginRequest data,
-        @RequestBody String token
+        @RequestBody LoginRequest data
     )
     {
         try {
-
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -206,15 +208,22 @@ public class UserController {
         }
     }
 
+    @AllArgsConstructor
+    @Data
+    static public class UpdateRoleRequest{
+        Integer useridInteger;
+        String  role;
+        String  token;
+    }
+
     // 权限修改
     @PostMapping("/updateRole")
     public ResponseEntity<?> updateRole(
-        @RequestBody String userid,
-        @RequestBody String role,
-        @RequestBody String token
+        @RequestBody UpdateRoleRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -226,9 +235,23 @@ public class UserController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
-            int uid = Integer.parseInt(userid);
-            int newRole = Integer.parseInt(role);
+            int uid;
+            int newRole;
             // 验证权限是否合法
+            if (data.getUseridInteger() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("用户 id 不能为空"));
+            } else {
+                uid = data.getUseridInteger();
+            }
+            if (data.getRole() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("权限不能为空"));
+            } else {
+                newRole = Integer.parseInt(data.getRole());
+            }
+            if (newRole < 1 || newRole > 2){
+                return ResponseEntity.status(400).body(new ErrorResponse("权限不合法"));
+            }
+
             // 修改用户权限
             userMapper.updateUserRole(uid, newRole);
 

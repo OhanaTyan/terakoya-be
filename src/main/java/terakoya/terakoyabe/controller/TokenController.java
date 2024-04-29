@@ -12,11 +12,9 @@ public class TokenController {
     UserMapper userMapper;
 
     // token -> id
-    private static Map<String, Integer> tokenMap = new HashMap<>();
-    private static Map<Integer, String> idMap = new HashMap<>();
-    static{
-        
-    }
+    private static final Map<String, Integer> tokenMap = new HashMap<>();
+    private static final Map<Integer, String> idMap = new HashMap<>();
+
 
     // 获取长度为10的随机字母字符串
     private static String generateString(){
@@ -48,9 +46,10 @@ public class TokenController {
     public static boolean verifyToken(String token) throws Exception{
         if (tokenMap.containsKey(token)){
             return true;
+        } else {
+            return false;
         }
-        return false;
-    }   
+    }
 
     public static int getUid(String token) throws Exception{
         if (tokenMap.containsKey(token)){

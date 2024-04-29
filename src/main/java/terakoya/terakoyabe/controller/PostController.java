@@ -52,6 +52,7 @@ public class PostController {
         Integer board;
         String title;
         String content;
+        String token;
     }
 
     @AllArgsConstructor
@@ -120,11 +121,11 @@ public class PostController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-        @RequestBody CreateRequest data,
-        @RequestBody String token
+        @RequestBody CreateRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -197,15 +198,16 @@ public class PostController {
         String  content;
         Integer likes;
         Integer dislike;
+        String  token;
     }
 
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
-        @RequestBody MyPost data,
-        @RequestBody String token 
-    ) 
+        @RequestBody MyPost data
+    )
     {
         try {
+            String token = data.getToken();
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
@@ -258,25 +260,16 @@ public class PostController {
     @Data
     public static class DeleteRequest{
         Integer pid;
-        // 如果不加下面的字段，会出现无法解析的错误
-        // String unused;
-        /*
-        DefaultHandlerExceptionResolver : Resolved [org.springframework.http.
-        converter.HttpMessageNotReadableException: JSON parse error: Cannot
-        construct instance of `terakoya.terakoyabe.controller
-        .PostController$DeleteRequest` (although at least one Creator exists):
-        cannot deserialize from Object value (no delegate- or property-based
-        Creator)]
-         */
+        String  token;
     }
 
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
-        @RequestBody DeleteRequest data,
-        @RequestBody String token 
-    ) 
+        @RequestBody DeleteRequest data
+    )
     {
         try {
+            String token = data.getToken();
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
@@ -500,6 +493,17 @@ public class PostController {
             ));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ServerError(e));
+        }
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<?> test(){
+        // 该函数用于测试异常功能是否好用
+        try {
+            replyMapper.deleteReply(-12);
+            return ResponseEntity.ok("test");
+        } catch (Exception e){
+            return ResponseEntity.ok("test");
         }
     }
 }

@@ -259,8 +259,8 @@ public class UserController {
 
     @Data
     public static class UserListRequest{
-        private int page;
-        private String keyword;
+        Integer page;
+        String keyword;
     }
 
     @Data
@@ -287,7 +287,11 @@ public class UserController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
-            int page = data.getPage();
+            // int page = data.getPage();
+            int page = 1;
+            if (data.getPage() != null){
+                page = data.getPage();
+            }
             String keyword = data.getKeyword();
 
             if (keyword == null){

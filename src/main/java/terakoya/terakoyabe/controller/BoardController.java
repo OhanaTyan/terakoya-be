@@ -86,9 +86,18 @@ public class BoardController {
         }
     }
 
+
+    @AllArgsConstructor
+    @Data
+    public static class MyBoard{
+        Integer id;
+        String  name;
+        String  description;
+    }
+
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
-        @RequestBody Board board,
+        @RequestBody MyBoard data,
         @CookieValue(name="uid") int uid,
         @CookieValue(name="token") String token
     )
@@ -104,15 +113,28 @@ public class BoardController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
+            int boardId;
+            if (data.getId() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("板块 id 不能为空"));
+            } else {
+                boardId = data.getId();
+            }
+
             // 验证是否存在该板块
-            Board oldBoard = boardMapper.findByID(board.getId());
+            Board oldBoard = boardMapper.findByID(boardId);
             if (oldBoard == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
+            String name;
+            if (data.getName() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("板块名字不能为空"));
+            } else {
+                name = data.getName();
+            }
             // 验证板块名字是否存在
-            if (boardMapper.findByName(board.getName())!= null){
+            if (boardMapper.findByName(name)!= null){
                 // 虽然该板块名字存在，但是当前板块名字
-                if (board.getName().equals(oldBoard.getName())){
+                if (data.getName().equals(oldBoard.getName())){
                     // do nothing
                 } else {
                     return ResponseEntity.status(400).body(new ErrorResponse("板块名字已存在"));
@@ -121,9 +143,9 @@ public class BoardController {
             
             // 更新板块信息
             boardMapper.update(
-                board.getId(),
-                board.getName(),
-                board.getDescription()
+                boardId,
+                name,
+                data.getDescription()
             );
             
             return ResponseEntity.ok().body(null);
@@ -135,7 +157,7 @@ public class BoardController {
 
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
-        @RequestBody Board board,
+        @RequestBody MyBoard data,
         @CookieValue(name="uid", required=false) int uid,
         @CookieValue(name="token", required = false) String token
     )
@@ -151,7 +173,13 @@ public class BoardController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
-            int boardId = board.getId();
+            // int boardId = data.getId();
+            int boardId;
+            if (data.getId() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("板块 id 不能为空"));
+            } else {
+                boardId = data.getId();
+            }
 
             // 验证是否存在该板块
             Board oldBoard = boardMapper.findByID(boardId);
@@ -159,7 +187,7 @@ public class BoardController {
                 return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
             // 清除板块
-            boardMapper.deleteBoard(board.getId());
+            boardMapper.deleteBoard(data.getId());
             // 将该板块下的所有帖子的 postid 改为 0
             postMapper.updateBoardToZero(boardId);
 
@@ -171,7 +199,7 @@ public class BoardController {
 
     @AllArgsConstructor
     @Data
-    public static class ListRequest{
+    public static class ListResponse{
         int boardCount;
         List<Board> boards;
     }
@@ -192,7 +220,7 @@ public class BoardController {
             List<Board> boards = boardMapper.listAll();
             int boardCount = boards.size();
 
-            return ResponseEntity.ok().body(new ListRequest(boardCount, boards));
+            return ResponseEntity.ok().body(new ListResponse(boardCount, boards));
 
         } catch (Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));

@@ -3,7 +3,6 @@ package terakoya.terakoyabe.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ibatis.annotations.Arg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -76,15 +75,15 @@ public class ReplyController {
 
     @AllArgsConstructor
     @Data
-    private static class CreateRequest{
-        private int pid;
+    public static class CreateRequest{
+        private Integer pid;
         private String content;
     }
 
     // 创建回复
     @PostMapping("/create")
     public ResponseEntity<?> create(
-        @RequestBody CreateRequest createRequest,
+        @RequestBody CreateRequest data,
         @CookieValue(name="uid", required = false) int uid,
         @CookieValue(name="token", required = false) String token
     )
@@ -95,8 +94,13 @@ public class ReplyController {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
 
-            int pid = createRequest.getPid();
-            String content = createRequest.getContent();
+            int pid;
+            if (data.getPid() == null) {
+                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 pid"));
+            } else {
+                pid = data.getPid();
+            }
+            String content = data.getContent();
 
             // 检查内容是否为空
             if (content == null || content.isEmpty()){
@@ -128,8 +132,8 @@ public class ReplyController {
  
     @AllArgsConstructor
     @Data
-    private static class EditRequest{
-        int rid;
+    public static class EditRequest{
+        Integer rid;
         String content;
     }
 
@@ -164,7 +168,20 @@ public class ReplyController {
                 return ResponseEntity.status(400).body(new ErrorResponse("回复不存在"));
             }
 
-            replyMapper.updateContent(editRequest.getRid(), editRequest.getContent());
+            int rid;
+            if (editRequest.getRid() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 rid"));
+            } else {
+                rid = editRequest.getRid();
+            }
+            String content = editRequest.getContent();
+
+            // 检查内容是否为空
+            if (content == null || content.isEmpty()){
+                return ResponseEntity.status(400).body(new ErrorResponse("内容不能为空"));
+            }
+
+            replyMapper.updateContent(rid, content);
 
             return ResponseEntity.ok("回复修改成功");
         } catch (Exception e){
@@ -174,9 +191,8 @@ public class ReplyController {
 
     @AllArgsConstructor
     @Data
-    private static class DeleteRequest{
-        int rid;
-        String unused;
+    public static class DeleteRequest{
+        Integer rid;
     }
 
     @PostMapping("/delete")
@@ -195,7 +211,12 @@ public class ReplyController {
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
-            int rid = data.getRid();
+            int rid;
+            if (data.getRid() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 rid"));
+            } else {
+                rid = data.getRid();
+            }
 
             // 检查回复是否存在
             if (!isReplyExists(rid)){
@@ -215,7 +236,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class GetListRequest{
-        int page;
+        Integer page;
         String poster;
     }
     
@@ -243,10 +264,14 @@ public class ReplyController {
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
-            int page = data.getPage();
+            int page = 1;
+            if (data.getPage() != null){
+                page = data.getPage();
+            } else {
+                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 page"));
+            }
             String poster = data.getPoster();
             int posterid = -1;
-            String keyword = "";
             int size = 50;
             int offset = (page - 1) * size;
             int replyCount = 0;

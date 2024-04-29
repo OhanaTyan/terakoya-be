@@ -84,7 +84,7 @@ public class ReplyController {
     @PostMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody CreateRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -150,7 +150,7 @@ public class ReplyController {
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
         @RequestBody EditRequest editRequest,
-        @SessionAttribute(name="token", required = false) String token  
+        @RequestBody String token  
     )
     {
         try {
@@ -200,7 +200,7 @@ public class ReplyController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
         @RequestBody DeleteRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -254,7 +254,7 @@ public class ReplyController {
     @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody GetListRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {

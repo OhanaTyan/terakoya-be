@@ -5,6 +5,7 @@ package terakoya.terakoyabe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,12 +61,15 @@ public class UserController {
                 // 生成 token
                 String token = TokenController.generateToken(user.getUid());
                 // 将 token 写入 session
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Access-Control-Allow-Credentials", "true");
+
                 session.setAttribute("token", token);
                 // 打印登录信息
                 System.out.println("登录成功，用户：" + user.toString());
                 // 打印 token 信息
                 System.out.println("生成 token：" + token);
-                return ResponseEntity.ok().body(new LoginResponse(user.getUid(), token));
+                return ResponseEntity.ok().headers(headers).body(new LoginResponse(user.getUid(), token));
             }
         } catch(Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));
@@ -169,7 +173,7 @@ public class UserController {
     @PostMapping("/updateAuth")
     public ResponseEntity<?> updateAuth(
         @RequestBody LoginRequest data,
-        @SessionAttribute(name="token", required=false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -220,7 +224,7 @@ public class UserController {
     public ResponseEntity<?> updateRole(
         @RequestBody String userid,
         @RequestBody String role,
-        @SessionAttribute(name="token", required=false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -264,7 +268,7 @@ public class UserController {
     @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody UserListRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {

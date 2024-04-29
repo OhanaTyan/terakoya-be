@@ -84,15 +84,16 @@ public class ReplyController {
     @PostMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody CreateRequest data,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证token
-            if (!TokenController.verifyToken(uid, token)) {
+            if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            int uid = TokenController.getUid(token);
 
             int pid;
             if (data.getPid() == null) {
@@ -149,15 +150,16 @@ public class ReplyController {
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
         @RequestBody EditRequest editRequest,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token  
+        @SessionAttribute(name="token", required = false) String token  
     )
     {
         try {
             // 验证token
-            if (!TokenController.verifyToken(uid, token)) {
+            if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
             }
+
+            int uid = TokenController.getUid(token);
             // 验证是否是管理员
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
@@ -198,15 +200,16 @@ public class ReplyController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
         @RequestBody DeleteRequest data,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证token
-            if (!TokenController.verifyToken(uid, token)) {
+            if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
             }
+            int uid = TokenController.getUid(token);
+
             // 验证是否是管理员
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
@@ -251,15 +254,16 @@ public class ReplyController {
     @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody GetListRequest data,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证token
-            if (!TokenController.verifyToken(uid, token)) {
+            if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
             }
+
+            int uid = TokenController.getUid(token);
             // 验证是否是管理员
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));

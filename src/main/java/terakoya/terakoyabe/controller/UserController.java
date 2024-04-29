@@ -5,16 +5,15 @@ package terakoya.terakoyabe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import terakoya.terakoyabe.mapper.UserMapper;
@@ -48,7 +47,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest data, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest data, HttpSession session) {
         try {
             // 验证用户名和密码是否为空
             if (data == null || data.getUsername() == null || data.getPassword() == null){
@@ -60,18 +59,13 @@ public class UserController {
             } else {
                 // 生成 token
                 String token = TokenController.generateToken(user.getUid());
-                // 清除掉旧 cookie
-                response.setHeader("Set-Cookie", "uid=; path=/; Max-Age=0");
-                response.setHeader("Set-Cookie", "token=; path=/; Max-Age=0");
-                // 将 token 写入 cookie
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Set-Cookie", "uid=" + user.getUid() + "; path=/; Max-Age=3600");
-                headers.add("Set-Cookie", "token=" + token + "; path=/; Max-Age=3600");
+                // 将 token 写入 session
+                session.setAttribute("token", token);
                 // 打印登录信息
                 System.out.println("登录成功，用户：" + user.toString());
                 // 打印 token 信息
                 System.out.println("生成 token：" + token);
-                return ResponseEntity.ok().headers(headers).body(new LoginResponse(user.getUid(), token));
+                return ResponseEntity.ok().body(new LoginResponse(user.getUid(), token));
             }
         } catch(Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));
@@ -158,16 +152,12 @@ public class UserController {
     // 登出
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-    //    @CookieValue(name="uid") int uid,
-     //   @CookieValue(name="token") String token,
-        HttpServletResponse response
+        String token
     )
     {
         try {
 
-            // 清除掉旧 cookie
-            response.setHeader("Set-Cookie", "uid=; path=/; Max-Age=0");
-            response.setHeader("Set-Cookie", "token=; path=/; Max-Age=0");
+            TokenController.invalidateToken(token);
             // 登出成功
             return ResponseEntity.ok("登出成功");
         } catch (Exception e) {
@@ -179,14 +169,13 @@ public class UserController {
     @PostMapping("/updateAuth")
     public ResponseEntity<?> updateAuth(
         @RequestBody LoginRequest data,
-        @CookieValue(name="uid",  required=false) int uid,
-        @CookieValue(name="token", required=false) String token
+        @SessionAttribute(name="token", required=false) String token
     )
     {
         try {
 
             // 验证 token
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
 
@@ -194,6 +183,8 @@ public class UserController {
             String password = data.getPassword();
             // 验证用户名是否存在
             User user = userMapper.getUserByUsername(username);
+            // 获取操作用户的 uid
+            int uid = TokenController.getUid(token);
             // 如果用户名已存在
             if (user != null){
                 // 判断该用户是否为当前用户
@@ -229,15 +220,16 @@ public class UserController {
     public ResponseEntity<?> updateRole(
         @RequestBody String userid,
         @RequestBody String role,
-        @CookieValue(name="uid", required=false) int authid,
-        @CookieValue(name="token", required=false) String token
+        @SessionAttribute(name="token", required=false) String token
     )
     {
         try {
             // 验证 token
-            if (!TokenController.verifyToken(authid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            int authid = TokenController.getUid(token);
             // 验证用户权限是否为管理员
             if (!userService.isAdmin(authid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
@@ -272,15 +264,15 @@ public class UserController {
     @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody UserListRequest data,
-        @CookieValue(name="uid", required=false) int authid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证 token
-            if (!TokenController.verifyToken(authid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            int authid = TokenController.getUid(token);
             // 验证用户权限是否为管理员
             if (!userService.isAdmin(authid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));

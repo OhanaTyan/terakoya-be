@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -129,15 +129,16 @@ public class PostController {
     @RequestMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody CreateRequest data,
-        @CookieValue(name="uid", required = false) int posterid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证 token
-            if (!TokenController.verifyToken(posterid, token)) {
+            if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            int posterid = TokenController.getUid(token);
+
             String title = data.getTitle();
             String content = data.getContent();
             int board;
@@ -209,15 +210,15 @@ public class PostController {
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
         @RequestBody MyPost data,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token 
+        @SessionAttribute(name="token", required = false) String token 
     ) 
     {
         try {
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
 
+            int uid = TokenController.getUid(token);
             // 验证是否是管理用户
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
@@ -280,14 +281,15 @@ public class PostController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
         @RequestBody DeleteRequest data,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token 
+        @SessionAttribute(name="token", required = false) String token 
     ) 
     {
         try {
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            int uid = TokenController.getUid(token);
+
             // 验证是否是管理员
             boolean isAdmin = userService.isAdmin(uid);
 
@@ -396,15 +398,15 @@ public class PostController {
     @PostMapping("/list")
     public ResponseEntity<?> getList(
         @RequestBody(required = false) GetListRequest data,
-        @CookieValue(name="uid", required = false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {  
         try{
             // 验证 token
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            int uid = TokenController.getUid(token);
             // 验证是否是管理员
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));

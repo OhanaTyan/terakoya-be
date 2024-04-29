@@ -500,10 +500,11 @@ public class PostController {
     public ResponseEntity<?> test(){
         // 该函数用于测试异常功能是否好用
         try {
-            replyMapper.deleteReply(-12);
-            return ResponseEntity.ok("test");
+            Integer i = null;
+            int ii = i;
+            return ResponseEntity.ok("test" + ii);
         } catch (Exception e){
-            return ResponseEntity.ok("test");
+            return ResponseEntity.ok("error test");
         }
     }
 }

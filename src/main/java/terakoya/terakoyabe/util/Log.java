@@ -10,6 +10,7 @@ public class Log {
     private static final String LOG_FILE = "/home/ubuntu/terakoya-be-log.txt";
 
     private static FileWriter writer;
+    private static boolean inited = false;
 
     // 获取进程号
     private static long getPid(){
@@ -17,12 +18,10 @@ public class Log {
         return ManagementFactory.getRuntimeMXBean().getPid();
     }
 
-    public static FileWriter getFileWriter() {
-        try {
-            if (writer == null) {
-                writer = new FileWriter(LOG_FILE, true);
-                // terakoya 的 ascii 画
-                writer.write("\n  _______             _                      \n |__   __|           | |                     \n    | | ___ _ __ __ _| | _____  _   _  __ _  \n    | |/ _ \\ '__/ _` | |/ / _ \\| | | |/ _` | \n    | |  __/ | | (_| |   < (_) | |_| | (_| | \n    |_|\\___|_|  \\__,_|_|\\_\\___/ \\__, |\\__,_| \n                                 __/ |       \n                                |___/      \n");
+    public static void  init(){
+        if (!inited) {
+            inited = true;
+            // terakoya 的 ascii 画
 /*
   _______             _
  |__   __|           | |
@@ -33,12 +32,21 @@ public class Log {
                                  __/ |
                                 |___/
  */
-                // TODO:写入进程号和当前时间
-                info("运行成功");
-                info("当前进程号为pid=" + getPid());
-                info("当前时间为" + getCurrentTimeString());
+            // TODO:写入进程号和当前时间
+            info("运行成功");
+            info("当前进程号为pid=" + getPid());
+            info("当前时间为" + getCurrentTimeString());
+        }
+
+    }
+
+    public static FileWriter getFileWriter() {
+        try {
+            if (!inited){
+                inited = true;
+                init();
             }
-            return writer;
+            return new FileWriter(LOG_FILE, true);
         } catch (FileNotFoundException e) {
             throw new RuntimeException();
         } catch (IOException e) {
@@ -57,7 +65,7 @@ public class Log {
             FileWriter writer = getFileWriter();
             writer.write("[info]" + getCurrentTimeString() + "\n");
             writer.write(s + "\n");
-            writer.flush();
+            writer.close();
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -68,7 +76,7 @@ public class Log {
             FileWriter writer = getFileWriter();
             writer.write("[Error]" + getCurrentTimeString() + "\n");
             writer.write(s + "\n");
-            writer.flush();
+            writer.close();
         } catch (IOException e){
             e.printStackTrace();
         }

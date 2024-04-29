@@ -1,21 +1,10 @@
 package terakoya.terakoyabe.controller;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.BoardService;
 import terakoya.terakoyabe.Service.PostService;
@@ -26,6 +15,9 @@ import terakoya.terakoyabe.mapper.PostMapper;
 import terakoya.terakoyabe.mapper.ReplyMapper;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ServerError;
+
+import java.util.List;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -98,7 +90,7 @@ public class PostController {
         return postService.getPostById(pid);
     }
 
-    
+
     // 检查帖子是否合法
     private boolean isPostValid(MyPost post) {
         return isPostValid(post.getTitle(), post.getContent());
@@ -121,12 +113,12 @@ public class PostController {
             }
             posts = postMapper.getPostByReleaseTimeAndReplyTime(releaseTime, replyTime);
         } while (posts.isEmpty());
-        
+
         return posts.getFirst().getId();
     }
 
 
-    @RequestMapping("/create")
+    @PostMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody CreateRequest data,
         @RequestBody String token

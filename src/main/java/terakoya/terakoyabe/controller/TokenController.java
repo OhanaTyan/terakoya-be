@@ -8,15 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TokenController {
-    // id -> token
 
     @Autowired
     UserMapper userMapper;
 
-    private static final Map<String, String> tokenMap;
-
+    // token -> id
+    private static Map<String, Integer> tokenMap = new HashMap<>();
+    private static Map<Integer, String> idMap = new HashMap<>();
     static{
-        tokenMap = new HashMap<>();
+
     }
 
     // 获取长度为10的随机字母字符串
@@ -32,33 +32,41 @@ public class TokenController {
 
 
     public static String generateToken(int uid) throws Exception{
-        String uidStr = Integer.toString(uid);
-        if (tokenMap.get(uidStr) != null){
-            tokenMap.remove(uidStr);
+        if (idMap.containsKey(uid)){
+            // 使token失效
+            invalidateToken(idMap.get(uid));
         }
+
         String token = generateString();
-        tokenMap.put(uidStr, token);
+        while (tokenMap.containsKey(token)){
+            token = generateString();
+        }
+        tokenMap.put(token, uid);
+        idMap.put(uid, token);
         return token;
     }
 
-    public static boolean verifyToken(int uid, String token) throws Exception{
-        
-        Log.info(Integer.toString(uid));
-        Log.info(token);
-        String uidStr = Integer.toString(uid);
-        if (tokenMap.get(uidStr) == null){
+    public static boolean verifyToken(String token) throws Exception{
+        if (tokenMap.containsKey(token)){
+            return true;
+        } else {
             return false;
         }
-        return tokenMap.get(uidStr).equals(token);
+    }
+
+    public static int getUid(String token) throws Exception{
+        if (tokenMap.containsKey(token)){
+            return tokenMap.get(token);
+        }
+        return -1;
     }
 
 
-    public static void invalidateToken(String uid, String token) throws Exception{
-        if (tokenMap.get(uid) == null){
-            return;
-        }
-        if (tokenMap.get(uid).equals(token)){
-            tokenMap.remove(uid);
+    public static void invalidateToken(String token) throws Exception{
+        if (tokenMap.containsKey(token)){
+            int uid = tokenMap.get(token);
+            tokenMap.remove(token);
+            idMap.remove(uid);
         }
     }
 }

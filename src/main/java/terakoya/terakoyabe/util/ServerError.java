@@ -14,11 +14,8 @@ public class ServerError {
     String message;
 
     public ServerError(Exception e){
-        PrintWriter pw = getPrintWriter();
-        pw.println("[Error]" + getCurrentTime());
-        e.printStackTrace(pw);
-        pw.println("\n");
-        pw.flush();
+        // TODO: 增加适用于linux的log
+        e.printStackTrace();
         message = e.toString();
     }
 }

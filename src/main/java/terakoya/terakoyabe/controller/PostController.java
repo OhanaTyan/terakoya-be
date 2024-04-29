@@ -504,7 +504,7 @@ public class PostController {
             int ii = i;
             return ResponseEntity.ok("test" + ii);
         } catch (Exception e){
-            return ResponseEntity.ok("error test");
+            return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
 }

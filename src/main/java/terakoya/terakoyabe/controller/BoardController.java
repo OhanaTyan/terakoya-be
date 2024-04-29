@@ -55,7 +55,7 @@ public class BoardController {
     @PostMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody Board board,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -159,7 +159,7 @@ public class BoardController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
         @RequestBody MyBoard data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -207,7 +207,7 @@ public class BoardController {
 
     @GetMapping("/list")
     public ResponseEntity<?> list(
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {

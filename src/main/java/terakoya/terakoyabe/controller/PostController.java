@@ -129,7 +129,7 @@ public class PostController {
     @RequestMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody CreateRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -210,7 +210,7 @@ public class PostController {
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
         @RequestBody MyPost data,
-        @SessionAttribute(name="token", required = false) String token 
+        @RequestBody String token 
     ) 
     {
         try {
@@ -281,7 +281,7 @@ public class PostController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
         @RequestBody DeleteRequest data,
-        @SessionAttribute(name="token", required = false) String token 
+        @RequestBody String token 
     ) 
     {
         try {
@@ -398,7 +398,7 @@ public class PostController {
     @PostMapping("/list")
     public ResponseEntity<?> getList(
         @RequestBody(required = false) GetListRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {  
         try{

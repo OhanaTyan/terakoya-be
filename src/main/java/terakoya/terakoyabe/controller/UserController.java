@@ -165,7 +165,7 @@ public class UserController {
     @PostMapping("/updateAuth")
     public ResponseEntity<?> updateAuth(
         @RequestBody LoginRequest data,
-        @SessionAttribute(name="token", required=false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -216,7 +216,7 @@ public class UserController {
     public ResponseEntity<?> updateRole(
         @RequestBody String userid,
         @RequestBody String role,
-        @SessionAttribute(name="token", required=false) String token
+        @RequestBody String token
     )
     {
         try {
@@ -260,7 +260,7 @@ public class UserController {
     @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody UserListRequest data,
-        @SessionAttribute(name="token", required = false) String token
+        @RequestBody String token
     )
     {
         try {

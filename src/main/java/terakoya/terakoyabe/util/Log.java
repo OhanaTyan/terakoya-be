@@ -19,8 +19,7 @@ public class Log {
     }
 
     public static void  init(){
-        if (!inited) {
-            inited = true;
+        inited = true;
             // terakoya 的 ascii 画
 /*
   _______             _
@@ -33,10 +32,11 @@ public class Log {
                                 |___/
  */
             // TODO:写入进程号和当前时间
-            info("运行成功");
-            info("当前进程号为pid=" + getPid());
-            info("当前时间为" + getCurrentTimeString());
-        }
+        info("\n  _______             _                      \n |__   __|           | |                     \n    | | ___ _ __ __ _| | _____  _   _  __ _  \n    | |/ _ \\ '__/ _` | |/ / _ \\| | | |/ _` | \n    | |  __/ | | (_| |   < (_) | |_| | (_| | \n    |_|\\___|_|  \\__,_|_|\\_\\___/ \\__, |\\__,_| \n                                 __/ |       \n                                |___/        \n");
+        info("运行成功");
+        info("当前进程号为pid=" + getPid());
+        info("当前时间为" + getCurrentTimeString());
+
 
     }
 

@@ -52,8 +52,6 @@ public class UserController {
             } else {
                 // 生成 token
                 String token = TokenController.generateToken(user.getUid());
-                // 将 token 写入 session
-                session.setAttribute("token", token);
                 // 打印登录信息
                 System.out.println("登录成功，用户：" + user.toString());
                 // 打印 token 信息

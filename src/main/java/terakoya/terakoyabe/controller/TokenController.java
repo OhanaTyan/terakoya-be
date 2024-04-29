@@ -2,7 +2,6 @@ package terakoya.terakoyabe.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import terakoya.terakoyabe.mapper.UserMapper;
-import terakoya.terakoyabe.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,11 +12,9 @@ public class TokenController {
     UserMapper userMapper;
 
     // token -> id
-    private static Map<String, Integer> tokenMap = new HashMap<>();
-    private static Map<Integer, String> idMap = new HashMap<>();
-    static{
+    private static final Map<String, Integer> tokenMap = new HashMap<>();
+    private static final Map<Integer, String> idMap = new HashMap<>();
 
-    }
 
     // 获取长度为10的随机字母字符串
     private static String generateString(){

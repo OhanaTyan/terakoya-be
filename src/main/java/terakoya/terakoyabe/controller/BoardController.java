@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,15 +55,15 @@ public class BoardController {
     @PostMapping("/create")
     public ResponseEntity<?> create(
         @RequestBody Board board,
-        @CookieValue(name="uid", required=false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证用户身份
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            int uid = TokenController.getUid(token);
             // 验证是否是管理用户
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
@@ -98,15 +98,16 @@ public class BoardController {
     @PostMapping("/edit")
     public ResponseEntity<?> edit(
         @RequestBody MyBoard data,
-        @CookieValue(name="uid") int uid,
-        @CookieValue(name="token") String token
+        @SessionAttribute(name="token") String token
     )
     {
         try {
             // 验证 token
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            int uid = TokenController.getUid(token);
 
             // 验证是否是管理用户
             if (!userService.isAdmin(uid)){
@@ -158,16 +159,16 @@ public class BoardController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(
         @RequestBody MyBoard data,
-        @CookieValue(name="uid", required=false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证 token
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
 
+            int uid = TokenController.getUid(token);
             // 验证是否是管理用户
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
@@ -206,13 +207,12 @@ public class BoardController {
 
     @GetMapping("/list")
     public ResponseEntity<?> list(
-        @CookieValue(name="uid", required=false) int uid,
-        @CookieValue(name="token", required = false) String token
+        @SessionAttribute(name="token", required = false) String token
     )
     {
         try {
             // 验证用户身份
-            if (!TokenController.verifyToken(uid, token)){
+            if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
 

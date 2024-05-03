@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.BoardService;
 import terakoya.terakoyabe.Service.PostService;
+import terakoya.terakoyabe.Service.ReplyService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.entity.Reply;
-import terakoya.terakoyabe.mapper.ReplyMapper;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ServerError;
 
@@ -34,7 +34,7 @@ public class PostController {
     private PostService postService;
 
     @Autowired
-    private ReplyMapper replyMapper;
+    private ReplyService replyService;
 
 
     @AllArgsConstructor
@@ -301,7 +301,7 @@ public class PostController {
                 "该帖子已被删除",
                 -1
             );
-            replyMapper.deleteByPostid(pid);
+            replyService.deleteByPostid(pid);
             
             return ResponseEntity.ok().body("删除成功");
         } catch (Exception e) {
@@ -476,7 +476,7 @@ public class PostController {
             int size = 50;
             int offset = (page - 1) * size;
             // 获取回复列表内容
-            List<Reply> replies = replyMapper.getRepliesByPostid(pid, offset, size);
+            List<Reply> replies = replyService.getRepliesByPostid(pid, offset, size);
 
             return ResponseEntity.ok().body(new GetPostResponse(
                 post, 
@@ -492,7 +492,7 @@ public class PostController {
     public ResponseEntity<?> test(){
         // 该函数用于测试异常功能是否好用
         try {
-            replyMapper.deleteReply(-12);
+            replyService.deleteReply(-12);
             return ResponseEntity.ok("test");
         } catch (Exception e){
             return ResponseEntity.ok("test");

@@ -193,7 +193,7 @@ public class BoardController {
             return ResponseEntity.status(500).body(new ServerError(e));
         }
     }
-    @AllArgsConstructor
+    // @AllArgsConstructor
     @Data
     public static class ListRequest{
         String token;
@@ -208,11 +208,11 @@ public class BoardController {
 
     @PostMapping("/list")
     public ResponseEntity<?> list(
-        String token
+        @RequestBody ListRequest data
     )
     {
         try {
-            // String token = data.getToken();
+            String token = data.getToken();
             // 验证用户身份
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));

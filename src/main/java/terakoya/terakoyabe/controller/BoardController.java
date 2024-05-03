@@ -10,7 +10,7 @@ import terakoya.terakoyabe.Service.PostService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Board;
 import terakoya.terakoyabe.setting.Setting;
-import terakoya.terakoyabe.setting.Setting;
+import terakoya.terakoyabe.util.Log;
 import terakoya.terakoyabe.util.ServerError;
 
 import java.util.List;
@@ -170,6 +170,7 @@ public class BoardController {
             } else {
                 boardid = data.getBid();
                 // TODO: 打印板块号
+                Log.info("板块号为" + boardid);
             }
 
             // 验证是否存在该板块

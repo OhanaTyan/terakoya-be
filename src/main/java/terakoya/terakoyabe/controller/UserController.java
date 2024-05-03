@@ -296,7 +296,7 @@ public class UserController {
 
             // int page = data.getPage();
             int page = 1;
-            if (false){
+            if (true){
                 page = data.getPage();
             }
             String keyword = data.getKeyword();

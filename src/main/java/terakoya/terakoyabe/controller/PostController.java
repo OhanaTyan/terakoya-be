@@ -362,6 +362,7 @@ public class PostController {
         int bid;
         String poster;
         String keyword;
+        String token;
     }
 
     @AllArgsConstructor
@@ -373,11 +374,11 @@ public class PostController {
 
     @PostMapping("/list")
     public ResponseEntity<?> getList(
-        @RequestBody(required = false) GetListRequest data,
-        @RequestBody String token
+        @RequestBody(required = false) GetListRequest data
     )
     {  
-        try{
+        try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));

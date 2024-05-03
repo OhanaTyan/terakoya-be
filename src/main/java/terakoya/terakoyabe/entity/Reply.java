@@ -11,8 +11,6 @@ public class Reply {
     private int replyer;
     private int postid;
     private String content;
-    private int likes;
-    private int dislike;
-    
+
 }
 

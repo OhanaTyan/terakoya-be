@@ -7,7 +7,9 @@ public interface UserService {
 
     boolean isAdmin(int uid);
 
-    int getUserIdByUsername(String poster);
+    int getUseridByUsername(String poster);
+
+    boolean isUseridExists(int posterid);
 
 
 }

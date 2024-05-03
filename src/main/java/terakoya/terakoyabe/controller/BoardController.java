@@ -196,7 +196,7 @@ public class BoardController {
         List<Board> boards;
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<?> list(
         @RequestBody String token
     )

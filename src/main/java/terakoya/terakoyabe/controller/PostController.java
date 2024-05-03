@@ -314,7 +314,7 @@ public class PostController {
         int page;
     }
 
-    @GetMapping("/latest")
+    @PostMapping("/latest")
     public ResponseEntity<?> getLatest(
         @RequestBody(required = false) GetLatestRequest data
     )
@@ -457,7 +457,7 @@ public class PostController {
         List<Reply> replies;
     }
 
-    @GetMapping("/{pid}")
+    @PostMapping("/{pid}")
     public ResponseEntity<?> getPost(
         @PathVariable("pid") int pid,
         @RequestBody(required = false) int pageint

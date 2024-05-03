@@ -326,7 +326,7 @@ public class ReplyController {
         private List<Board> boards;
     }
 
-    @GetMapping("/latest")
+    @PostMapping("/latest")
     public ResponseEntity<?> getLatest(){
         try {
             List<Reply> replies = replyService.getLatestReplies();

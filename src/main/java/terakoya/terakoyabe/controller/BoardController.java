@@ -80,7 +80,7 @@ public class BoardController {
     @AllArgsConstructor
     @Data
     public static class MyBoard{
-        Integer id;
+        int bid;
         String  name;
         String  description;
         String  token;
@@ -106,10 +106,10 @@ public class BoardController {
             }
 
             int boardid;
-            if (data.getId() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块 id 不能为空"));
             } else {
-                boardid = data.getId();
+                boardid = data.getBid();
             }
 
             // 验证是否存在该板块
@@ -137,7 +137,7 @@ public class BoardController {
 
             boardService.updateBoard(boardid, name, data.getDescription());
 
-            return ResponseEntity.ok().body(null);
+            return ResponseEntity.ok("编辑板块成功");
             
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ServerError(e));
@@ -164,10 +164,12 @@ public class BoardController {
 
             // int boardid = data.getId();
             int boardid;
-            if (data.getId() == null){
+            // TODO: 
+            if (false ){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块 id 不能为空"));
             } else {
-                boardid = data.getId();
+                boardid = data.getBid();
+                // TODO: 打印板块号
             }
 
             // 验证是否存在该板块
@@ -176,7 +178,7 @@ public class BoardController {
                 return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
             // 清除板块
-            boardService.deleteBoard(data.getId());
+            boardService.deleteBoard(data.getBid());
             // 将该板块下的所有帖子的 postid 改为 0
             postService.updateBoardToZero(boardid);
 

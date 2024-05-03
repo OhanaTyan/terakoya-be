@@ -73,7 +73,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class CreateRequest{
-        Integer pid;
+        int pid;
         String  content;
         String  token;
     }
@@ -94,7 +94,7 @@ public class ReplyController {
             int uid = TokenController.getUid(token);
 
             int postid;
-            if (data.getPid() == null) {
+            if (false) {
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 pid"));
             } else {
                 postid = data.getPid();
@@ -132,7 +132,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class EditRequest{
-        Integer replyid;
+        int replyid;
         String  content;
         String  token;
     }
@@ -170,7 +170,7 @@ public class ReplyController {
             }
 
             int replyid;
-            if (data.getReplyid() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数replyid"));
             } else {
                replyid = data.getReplyid();
@@ -193,7 +193,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class DeleteRequest{
-        Integer replyid;
+        int replyid;
         String  token;
     }
 
@@ -215,7 +215,7 @@ public class ReplyController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
             int replyid;
-            if (data.getReplyid() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数replyid"));
             } else {
                replyid = data.getReplyid();
@@ -239,7 +239,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class GetListRequest{
-        Integer page;
+        int page;
         String  poster;
         String  token;
     }
@@ -270,7 +270,7 @@ public class ReplyController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
             int page;
-            if (data.getPage() != null){
+            if (true){
                 page = data.getPage();
             } else {
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 page"));

@@ -16,7 +16,7 @@ public interface PostService {
 
 	List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime);
 
-	void updatePost(int id, String title, String content, Integer board);
+	void updatePost(int id, String title, String content, int board);
 
 	List<Post> getLatestPosts(int page, int size);
 

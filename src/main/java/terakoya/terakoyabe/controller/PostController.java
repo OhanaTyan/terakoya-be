@@ -46,7 +46,7 @@ public class PostController {
     @AllArgsConstructor
     @Data
     public static class CreateRequest{
-        Integer board;
+        int board;
         String title;
         String content;
         String token;
@@ -130,7 +130,7 @@ public class PostController {
             String title = data.getTitle();
             String content = data.getContent();
             int board;
-            if (data.getBoard() == null) {
+            if (false) {
                 return ResponseEntity.status(400).body(new ErrorResponse("板块不能为空"));
             } else {
                 board = data.getBoard();
@@ -184,15 +184,15 @@ public class PostController {
     @AllArgsConstructor
     @Data
     public static class MyPost{
-        Integer id;
-        Integer releaseTime;
-        Integer replyTime;
-        Integer posterid;
-        Integer board;
+        int id;
+        int releaseTime;
+        int replyTime;
+        int posterid;
+        int board;
         String  title;
         String  content;
-        Integer likes;
-        Integer dislike;
+        int likes;
+        int dislike;
         String  token;
     }
 
@@ -216,7 +216,7 @@ public class PostController {
             System.out.println(data.toString());
 
             int pid;
-            if (data.getId() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("pid 不能为空"));
             } else {
                 pid = data.getId();
@@ -254,7 +254,7 @@ public class PostController {
     @AllArgsConstructor
     @Data
     public static class DeleteRequest{
-        Integer pid;
+        int pid;
         String  token;
     }
 
@@ -274,7 +274,7 @@ public class PostController {
             boolean isAdmin = userService.isAdmin(uid);
 
             int pid;
-            if (data.getPid() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("pid 不能为空"));
             } else {
                 pid = data.getPid();
@@ -312,8 +312,8 @@ public class PostController {
     @AllArgsConstructor
     @Data
     public static class GetLatestRequest{
-        Integer bid;
-        Integer page;
+        int bid;
+        int page;
     }
 
     @GetMapping("/latest")
@@ -328,9 +328,9 @@ public class PostController {
                 bid = 0;
                 page = 1;
             } else {
-                if (data.getBid() == null)  bid = 0;
+                if (false)  bid = 0;
                 else                        bid = data.getBid();
-                if (data.getPage() == null) page = 1;
+                if (false) page = 1;
                 else                        page = data.getPage();
             }
             int size = 50;
@@ -360,8 +360,8 @@ public class PostController {
     @AllArgsConstructor
     @Data
     public static class GetListRequest{
-        Integer page;
-        Integer bid;
+        int page;
+        int bid;
         String poster;
         String keyword;
     }
@@ -391,14 +391,14 @@ public class PostController {
             }
 
             int page;
-            if (data.getPage() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("page 不能为空"));
             } else {
                 page = data.getPage();
             }
             int size = 50;
             int bid;
-            if (data.getBid() == null){
+            if (false){
                 bid = -1;
             } else {
                 bid = data.getBid();
@@ -462,7 +462,7 @@ public class PostController {
     @GetMapping("/{pid}")
     public ResponseEntity<?> getPost(
         @PathVariable("pid") int pid,
-        @RequestBody(required = false) Integer pageInteger
+        @RequestBody(required = false) int pageint
     )
     {
         try {
@@ -472,7 +472,7 @@ public class PostController {
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
             }
             int page;
-            page = Objects.requireNonNullElse(pageInteger, 1);
+            page = Objects.requireNonNullElse(pageint, 1);
             int size = 50;
             int offset = (page - 1) * size;
             // 获取回复列表内容

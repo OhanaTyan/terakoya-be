@@ -52,7 +52,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePost(int id, String title, String content, Integer board) {
+    public void updatePost(int id, String title, String content, int board) {
         postMapper.updatePost(id, title, content, board);
     }
 

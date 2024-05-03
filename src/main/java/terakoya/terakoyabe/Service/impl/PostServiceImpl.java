@@ -59,7 +59,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> getLatestPosts(int page, int size) {
-        Log.info("PostServiceImpl::getLatestPosts\n"+"\npage:"+page+"\nsize:"+size);
+        Log.info("PostServiceImpl::getLatestPosts\npage:"+page+"\nsize:"+size);
         int offset = MyUtil.getOffset(page, size);
         return postMapper.getLatestPosts(offset, size);
     }

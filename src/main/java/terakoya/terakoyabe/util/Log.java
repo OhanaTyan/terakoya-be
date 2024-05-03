@@ -54,6 +54,7 @@ public class Log {
             FileWriter writer = getFileWriter();
             writer.write("[Info]" + getCurrentTimeString() + "\n");
             writer.write(s + "\n");
+            writer.flush();
             writer.close();
         } catch (IOException e){
             e.printStackTrace();
@@ -65,6 +66,7 @@ public class Log {
             FileWriter writer = getFileWriter();
             writer.write("[Error]" + getCurrentTimeString() + "\n");
             writer.write(s + "\n");
+            writer.flush();
             writer.close();
         } catch (IOException e){
             e.printStackTrace();

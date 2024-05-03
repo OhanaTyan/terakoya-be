@@ -62,6 +62,11 @@ public class BoardController {
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
+            // 检查板块名字是否为空
+            if (data.getName().isEmpty()){
+                return ResponseEntity.status(400).body(new ErrorResponse("板块名字为空"));
+            }
+
             // 检查是否已有板块名字与传入板块相同
             if (isBoardNameExists(data.getName())){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块名字已存在"));
@@ -203,7 +208,7 @@ public class BoardController {
 
     @PostMapping("/list")
     public ResponseEntity<?> list(
-        @RequestBody ListRequest data
+        ListRequest data
     )
     {
         try {

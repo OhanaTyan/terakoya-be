@@ -203,7 +203,7 @@ public class UserController {
             userMapper.updateUser(uid, username, password, user.getRole());
 
             // 增加 Access-Control-Allow-Credentials 头信息，允许跨域请求携带 cookie
-            return ResponseEntity.ok().body("权限修改成功");
+            return ResponseEntity.ok("权限修改成功");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ServerError(e));
         }
@@ -212,7 +212,7 @@ public class UserController {
     @AllArgsConstructor
     @Data
     static public class UpdateRoleRequest{
-        Integer useridInteger;
+        int useridint;
         String  role;
         String  token;
     }
@@ -239,10 +239,10 @@ public class UserController {
             int uid;
             int newRole;
             // 验证权限是否合法
-            if (data.getUseridInteger() == null){
+            if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("用户 id 不能为空"));
             } else {
-                uid = data.getUseridInteger();
+                uid = data.getUseridint();
             }
             if (data.getRole() == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("权限不能为空"));
@@ -265,8 +265,9 @@ public class UserController {
 
     @Data
     public static class UserListRequest{
-        Integer page;
+        int page;
         String keyword;
+        String token;
     }
 
     @Data
@@ -278,11 +279,11 @@ public class UserController {
     // 管理后台用户
     @PostMapping("/list")
     public ResponseEntity<?> list(
-        @RequestBody UserListRequest data,
-        @RequestBody String token
+        @RequestBody UserListRequest data
     )
     {
         try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -295,7 +296,7 @@ public class UserController {
 
             // int page = data.getPage();
             int page = 1;
-            if (data.getPage() != null){
+            if (false){
                 page = data.getPage();
             }
             String keyword = data.getKeyword();

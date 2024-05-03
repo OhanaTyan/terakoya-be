@@ -28,4 +28,6 @@ public interface ReplyService {
     int getReplyCountByPosterid(int posterid);
 
     List<Reply> getLatestReplies();
+
+    void deleteByPostid(int postid);
 }

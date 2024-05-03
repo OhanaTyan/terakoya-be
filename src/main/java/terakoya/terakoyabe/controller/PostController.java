@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.BoardService;
 import terakoya.terakoyabe.Service.PostService;
+import terakoya.terakoyabe.Service.ReplyService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.entity.Reply;
@@ -32,6 +33,8 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private ReplyService replyService;
 
 
     @AllArgsConstructor
@@ -296,7 +299,7 @@ public class PostController {
                 "该帖子已被删除",
                 -1
             );
-            replyMapper.deleteByPostid(pid);
+            replyService.deleteByPostid(pid);
             
             return ResponseEntity.ok().body("删除成功");
         } catch (Exception e) {

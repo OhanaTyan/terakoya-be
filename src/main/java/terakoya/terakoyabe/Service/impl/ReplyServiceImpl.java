@@ -73,5 +73,10 @@ public class ReplyServiceImpl implements ReplyService {
         return replyMapper.getLatestReplies();
     }
 
+    @Override
+    public void deleteByPostid(int postid) {
+        replyMapper.deleteByPostid(postid);
+    }
+
 
 }

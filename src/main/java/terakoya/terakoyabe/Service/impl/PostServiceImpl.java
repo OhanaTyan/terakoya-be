@@ -6,6 +6,7 @@ import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.PostService;
 import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.mapper.PostMapper;
+import terakoya.terakoyabe.util.Log;
 
 import java.util.List;
 
@@ -64,6 +65,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> getLatestPostsByBoard(int boardid, int page, int size) {
+        Log.info("PostServiceImpl::getLatestPostsByBoard\nboardid:"+boardid+"\npage:"+page+"\nsize:"+size);
         int offset = MyUtil.getOffset(page, size);
         return postMapper.getLatestPostsByBoard(boardid, offset, size);
     }

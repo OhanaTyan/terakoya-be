@@ -316,7 +316,7 @@ public class PostController {
 
     @PostMapping("/latest")
     public ResponseEntity<?> getLatest(
-        @RequestBody(required = false) GetLatestRequest data
+        @RequestBody GetLatestRequest data
     )
     {
         try {

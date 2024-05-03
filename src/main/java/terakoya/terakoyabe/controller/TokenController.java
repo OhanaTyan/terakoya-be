@@ -2,6 +2,7 @@ package terakoya.terakoyabe.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import terakoya.terakoyabe.mapper.UserMapper;
+import terakoya.terakoyabe.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class TokenController {
     }
 
     public static boolean verifyToken(String token) throws Exception{
+        Log.info("传入token:" + token);
         if (tokenMap.containsKey(token)){
             return true;
         } else {

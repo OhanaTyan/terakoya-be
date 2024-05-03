@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import terakoya.terakoyabe.MyUtil;
 import terakoya.terakoyabe.Service.BoardService;
 import terakoya.terakoyabe.Service.PostService;
+import terakoya.terakoyabe.Service.ReplyService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Board;
 import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.entity.Reply;
-import terakoya.terakoyabe.mapper.ReplyMapper;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ErrorResponse;
 import terakoya.terakoyabe.util.ServerError;
@@ -26,13 +26,13 @@ import java.util.List;
 public class ReplyController {
 
     @Autowired
-    ReplyMapper replyMapper;
-
-    @Autowired
     PostService postService;
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    ReplyService replyService;
 
     @Autowired
     BoardService boardService;
@@ -42,13 +42,11 @@ public class ReplyController {
         int randomValue = MyUtil.getRandomValue();
         do {
             try {
-                replyMapper.createReply(
+                replyService.insertReply(
                     -randomValue,
                     replytime, 
                     replyer, 
-                    content, 
-                    0,
-                    0
+                    content
                 );
                 break;
                 // 如果提交时撞键则重新提交
@@ -58,12 +56,12 @@ public class ReplyController {
         } while (true);
         List<Reply> replies;
         do {
-            replies = replyMapper.getReplyByPostIdAndReplyTime(-randomValue, replytime);
+            replies = replyService.findReplyByPostidAndReplytime(-randomValue, replytime);
         } while (replies.isEmpty());
         
-        int id = replies.getFirst().getId();
-        replyMapper.updatePostid(id, postid);  
-        return id;
+        int replyid = replies.getFirst().getId();
+        replyService.updateReplyidByPostid(replyid, postid);
+        return postid;
     }
 
     @AllArgsConstructor
@@ -95,11 +93,11 @@ public class ReplyController {
 
             int uid = TokenController.getUid(token);
 
-            int pid;
+            int postid;
             if (data.getPid() == null) {
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 pid"));
             } else {
-                pid = data.getPid();
+                postid = data.getPid();
             }
             String content = data.getContent();
 
@@ -109,20 +107,20 @@ public class ReplyController {
             }
 
             // 检查帖子是否存在
-            if (postService.getPostById(pid) == null){
+            if (postService.findPostById(postid) == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在"));
             }
 
             int currentTime = MyUtil.getCurrentTime();
             int id = createReply(
-                pid,
+                postid,
                 currentTime,
                 uid,
                 content
             );
 
             // 更新所在帖子的最新回复时间
-            postService.updateReplyTime(pid, currentTime);
+            postService.updateReplyTime(postid, currentTime);
 
             return ResponseEntity.ok().body(new CreateResponse(id));
 
@@ -134,13 +132,13 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class EditRequest{
-        Integer rid;
+        Integer replyid;
         String  content;
         String  token;
     }
 
-    public boolean isReplyExists(int rid){
-        List<Reply> replies = replyMapper.getReplyById(rid);
+    public boolean isReplyExists(int replyid){
+        List<Reply> replies = replyService.findReplyById(replyid);
         if (replies.isEmpty()){
             return false;
         } else {
@@ -171,11 +169,11 @@ public class ReplyController {
                 return ResponseEntity.status(400).body(new ErrorResponse("回复不存在"));
             }
 
-            int rid;
-            if (data.getRid() == null){
-                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 rid"));
+            int replyid;
+            if (data.getReplyid() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数replyid"));
             } else {
-                rid = data.getRid();
+               replyid = data.getReplyid();
             }
             String content = data.getContent();
 
@@ -184,7 +182,7 @@ public class ReplyController {
                 return ResponseEntity.status(400).body(new ErrorResponse("内容不能为空"));
             }
 
-            replyMapper.updateContent(rid, content);
+            replyService.updateContent(replyid, content);
 
             return ResponseEntity.ok("回复修改成功");
         } catch (Exception e){
@@ -195,7 +193,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class DeleteRequest{
-        Integer rid;
+        Integer replyid;
         String  token;
     }
 
@@ -216,20 +214,20 @@ public class ReplyController {
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
-            int rid;
-            if (data.getRid() == null){
-                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 rid"));
+            int replyid;
+            if (data.getReplyid() == null){
+                return ResponseEntity.status(400).body(new ErrorResponse("缺少参数replyid"));
             } else {
-                rid = data.getRid();
+               replyid = data.getReplyid();
             }
 
             // 检查回复是否存在
-            if (!isReplyExists(rid)){
+            if (!isReplyExists(replyid)){
                 return ResponseEntity.status(400).body(new ErrorResponse("回复不存在"));
             }
             
             // 删除回复
-            replyMapper.deleteReply(rid);
+            replyService.deleteReply(replyid);
 
             return ResponseEntity.ok("回复删除成功");
 
@@ -271,39 +269,48 @@ public class ReplyController {
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
-            int page = 1;
+            int page;
             if (data.getPage() != null){
                 page = data.getPage();
             } else {
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数 page"));
             }
             String poster = data.getPoster();
-            int posterid = -1;
+            int posterid;
             int size = 50;
-            int offset = (page - 1) * size;
             int replyCount = 0;
             List<Reply> replies;
+            
             if (poster == null || poster.isEmpty()){
+                // fall through
                 // 获取所有回复
-                replies = replyMapper.getAllReplies(offset, size);
-                replyCount = replyMapper.getReplyCount();
             } else {
                 // 如果 poster 全部由数字组成
                 if (poster.matches("^\\d+$")){
                     posterid = Integer.parseInt(poster);
-                    replies = replyMapper.getRepliesByPoster(posterid, offset, size);
-                    replyCount = replyMapper.getReplyCountByPosterid(posterid);
-                } else {
-                    posterid = userService.getUserIdByUsername(poster);
-                    if (posterid == -1){
-                        replies = replyMapper.getAllReplies(offset, size);
-                        replyCount = replyMapper.getReplyCount();
-                    } else {
-                        replies = replyMapper.getRepliesByPoster(posterid, offset, size);
-                        replyCount = replyMapper.getReplyCountByPosterid(posterid);
+                    // 检查用户是否存在
+                    if (userService.isUseridExists(posterid)){
+                        // 如果用户存在，则返回该用户相关回复
+                        replies = replyService.getRepliesByPostid(posterid, page, size);
+                        replyCount = replyService.getReplyCountByPosterid(posterid);
+                        return ResponseEntity.ok().body(new GetListResponse(replyCount, replies));
                     }
+                    // fall through
+                } else {
+                    posterid = userService.getUseridByUsername(poster);
+                    if (posterid == -1){
+                        // 用户存在
+                        replies = replyService.getRepliesByPostid(posterid, page, size);
+                        replyCount = replyService.getReplyCountByPosterid(posterid); 
+                        return ResponseEntity.ok().body(new GetListResponse(replyCount, replies));
+                    } 
+                    // fall through
                 }
-            }
+           }
+            // 用户不存在，获取所有回复
+            replies = replyService.getAllReplies(page, size);
+            replyCount = replyService.getReplyCount();
+ 
             return ResponseEntity.ok().body(new GetListResponse(replyCount, replies));
         } catch (Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));
@@ -322,14 +329,14 @@ public class ReplyController {
     @GetMapping("/latest")
     public ResponseEntity<?> getLatest(){
         try {
-            List<Reply> replies = replyMapper.getLatest();
+            List<Reply> replies = replyService.getLatestReplies();
             // 获取最新回复所在的板块
             ArrayList<Board> boards = new ArrayList<>();
             for (Reply reply : replies){
                 int postid = reply.getPostid();
-                Post post = postService.getPostById(postid);
+                Post post = postService.findPostById(postid);
                 int boardid = post.getBoard();
-                Board board = boardService.getBoardById(boardid);
+                Board board = boardService.findBoardById(boardid);
                 boards.add(board);
             }
 

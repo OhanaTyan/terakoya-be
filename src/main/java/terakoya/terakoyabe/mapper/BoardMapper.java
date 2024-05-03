@@ -1,13 +1,12 @@
 package terakoya.terakoyabe.mapper;
 
-import java.util.List;
-
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-
 import terakoya.terakoyabe.entity.Board;
+
+import java.util.List;
 
 @Mapper
 public interface BoardMapper {
@@ -16,16 +15,16 @@ public interface BoardMapper {
     void create(String name, String description);
     
     @Select("SELECT * FROM boards WHERE name = #{name}")
-    Board findByName(String name);
+    Board findBoardByName(String name);
 
     @Select("SELECT * FROM boards")
-    List<Board> listAll();
+    List<Board> listAllBoards();
 
     @Select("SELECT * FROM boards WHERE id = #{id}")
-    Board findByID(int id);
+    Board findBoardById(int id);
 
     @Insert("UPDATE boards SET name = #{name}, description = #{description} WHERE id = #{id}")
-    void update(int id, String name, String description);
+    void updateBoard(int id, String name, String description);
 
     @Delete("DELETE FROM boards WHERE id = #{id}")
     void deleteBoard(int id);

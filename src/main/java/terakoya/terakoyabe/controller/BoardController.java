@@ -5,10 +5,11 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import terakoya.terakoyabe.Service.BoardService;
+import terakoya.terakoyabe.Service.PostService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Board;
-import terakoya.terakoyabe.mapper.BoardMapper;
-import terakoya.terakoyabe.mapper.PostMapper;
+import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ServerError;
 
@@ -18,15 +19,15 @@ import java.util.List;
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
 @RequestMapping("/board")
 public class BoardController {
-    @Autowired
-    BoardMapper boardMapper;
 
     @Autowired
-    PostMapper postMapper;
+    BoardService boardService;
 
     @Autowired
     UserService userService;
 
+    @Autowired
+    PostService postService;
 
     @AllArgsConstructor
     @Data
@@ -41,7 +42,7 @@ public class BoardController {
     }
 
     public boolean isBoardNameExists(String name){
-        Board board = boardMapper.findByName(name);
+        Board board = boardService.findBoardByName(name);
         return board!= null;
     }
     
@@ -66,12 +67,9 @@ public class BoardController {
                 return ResponseEntity.status(400).body(new ErrorResponse("板块名字已存在"));
             }
 
-            boardMapper.create(
-                data.getName(),
-                data.getDescription()
-            );
-            
-            int id = boardMapper.findByName(data.getName()).getId();
+            boardService.createBoard(data.getName(), data.getDescription());
+
+            int id = boardService.findBoardByName(data.getName()).getId();
 
             return ResponseEntity.ok().body(new CreateResponse(id));
         } catch (Exception e){
@@ -108,15 +106,15 @@ public class BoardController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
-            int boardId;
+            int boardid;
             if (data.getId() == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块 id 不能为空"));
             } else {
-                boardId = data.getId();
+                boardid = data.getId();
             }
 
             // 验证是否存在该板块
-            Board oldBoard = boardMapper.findByID(boardId);
+            Board oldBoard = boardService.findBoardById(boardid);
             if (oldBoard == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
@@ -127,7 +125,7 @@ public class BoardController {
                 name = data.getName();
             }
             // 验证板块名字是否存在
-            if (boardMapper.findByName(name)!= null){
+            if (boardService.findBoardByName(name)!= null){
                 // 虽然该板块名字存在，但是当前板块名字
                 if (data.getName().equals(oldBoard.getName())){
                     // do nothing
@@ -137,12 +135,9 @@ public class BoardController {
             }
             
             // 更新板块信息
-            boardMapper.update(
-                boardId,
-                name,
-                data.getDescription()
-            );
-            
+
+            boardService.updateBoard(boardid, name, data.getDescription());
+
             return ResponseEntity.ok().body(null);
             
         } catch (Exception e) {
@@ -168,23 +163,22 @@ public class BoardController {
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
 
-            // int boardId = data.getId();
-            int boardId;
+            int boardid;
             if (data.getId() == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块 id 不能为空"));
             } else {
-                boardId = data.getId();
+                boardid = data.getId();
             }
 
             // 验证是否存在该板块
-            Board oldBoard = boardMapper.findByID(boardId);
+            Board oldBoard = boardService.findBoardById(boardid);
             if (oldBoard == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
             }
             // 清除板块
-            boardMapper.deleteBoard(data.getId());
+            boardService.deleteBoard(data.getId());
             // 将该板块下的所有帖子的 postid 改为 0
-            postMapper.updateBoardToZero(boardId);
+            postService.updateBoardToZero(boardid);
 
             return ResponseEntity.ok().body("删除成功");
         } catch (Exception e) {
@@ -211,7 +205,7 @@ public class BoardController {
             }
 
             // 返回所有板块的列表
-            List<Board> boards = boardMapper.listAll();
+            List<Board> boards = boardService.listAllBoards();
             int boardCount = boards.size();
 
             return ResponseEntity.ok().body(new ListResponse(boardCount, boards));

@@ -11,8 +11,6 @@ import terakoya.terakoyabe.Service.PostService;
 import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.entity.Reply;
-import terakoya.terakoyabe.mapper.PostMapper;
-import terakoya.terakoyabe.mapper.ReplyMapper;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ServerError;
 
@@ -24,8 +22,6 @@ import java.util.Objects;
 @RequestMapping("/post")
 public class PostController {
 
-    @Autowired
-    private PostMapper postMapper;
 
     @Autowired
     private BoardService boardService;
@@ -36,8 +32,6 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    @Autowired
-    private ReplyMapper replyMapper;
 
 
     @AllArgsConstructor
@@ -65,15 +59,13 @@ public class PostController {
     private void insertPost(int releaseTime, int randomValue,int posterid, int board, String title, String content) {
         do {
             try {
-                postMapper.insertPost(
+                postService.insertPost(
                     releaseTime,
                     randomValue,
                     posterid,
                     board,
                     title, 
-                    content,
-                    0,
-                    0
+                    content
                 );
                 break;
                 // 如果提交时撞键，则重新提交
@@ -88,7 +80,7 @@ public class PostController {
     // 如果存在则返回该帖子
     // 否则返回 null
     private Post getPostById(int pid) {
-        return postService.getPostById(pid);
+        return postService.findPostById(pid);
     }
 
 
@@ -112,7 +104,7 @@ public class PostController {
             } catch (InterruptedException e){
                 // do nothing
             }
-            posts = postMapper.getPostByReleaseTimeAndReplyTime(releaseTime, replyTime);
+            posts = postService.findPostByReleaseTimeAndReplyTime(releaseTime, replyTime);
         } while (posts.isEmpty());
 
         return posts.getFirst().getId();
@@ -176,7 +168,7 @@ public class PostController {
             int id = getPostIdByReleaseTimeAndReplyTime(releaseTime, randomValue);
 
             // 将 id 对应的表的 replytime 设为 releaseTime
-            postMapper.updateReplyTime(id, releaseTime);
+            postService.updateReplyTime(id, releaseTime);
 
             return ResponseEntity.ok().body(new CreateResponse(id));
         } catch (Exception e) {
@@ -196,8 +188,6 @@ public class PostController {
         Integer board;
         String  title;
         String  content;
-        Integer likes;
-        Integer dislike;
         String  token;
     }
 
@@ -243,7 +233,7 @@ public class PostController {
 
 
             // 更新数据库
-            postMapper.updatePost(
+            postService.updatePost(
                 data.getId(),
                 data.getTitle(),
                 data.getContent(),
@@ -300,13 +290,13 @@ public class PostController {
             }
             
 
-            postMapper.updatePost(
+            postService.updatePost(
                 pid,
                 "该帖子已被删除",
                 "该帖子已被删除",
                 -1
             );
-            replyMapper.deleteByPostId(pid);
+            replyMapper.deleteByPostid(pid);
             
             return ResponseEntity.ok().body("删除成功");
         } catch (Exception e) {
@@ -339,22 +329,20 @@ public class PostController {
                 else                        page = data.getPage();
             }
             int size = 50;
-            int offset = (page - 1) * size;
 
             List<Post> posts;
             if (bid == 0){
                 // 从所有帖子中查询最新帖子
-                posts = postMapper.getLatestPosts(offset, size);
+                posts = postService.getLatestPosts(page, size);
             }
             else {
                 // 检查板块是否存在
-
                 if (!boardService.isBoardExists(bid)){
                     return ResponseEntity.status(400).body(new ErrorResponse("板块不存在或已被删除"));
                 }
 
                 // 从指定板块中查询最新帖子
-                posts = postMapper.getLatestPostsByBoard(bid, offset, size);
+                posts = postService.getLatestPostsByBoard(bid, page, size);
             }
 
             return ResponseEntity.ok().body(posts);
@@ -404,7 +392,6 @@ public class PostController {
                 page = data.getPage();
             }
             int size = 50;
-            int offset = (page - 1) * size;
             int bid;
             if (data.getBid() == null){
                 bid = -1;
@@ -422,7 +409,7 @@ public class PostController {
                     posterid = Integer.parseInt(poster);
                 } else {
                     // 如果 poster 不是数字，则认为是用户名
-                    posterid = userService.getUserIdByUsername(poster);
+                    posterid = userService.getUseridByUsername(poster);
                 }
             }
             String keyword;
@@ -434,15 +421,15 @@ public class PostController {
 
             List<Post> posts;
             
-            posts = postMapper.getPostsByBoardPosterAndKeyword(
+            posts = postService.getPostsByBoardPosterAndKeyword(
                 bid,
                 posterid,
                 keyword,
-                offset,
+                page,
                 size
             );
 
-            int postCount = postMapper.getPostCountByBoardPosterAndKeyword(
+            int postCount = postService.getPostCountByBoardPosterAndKeyword(
                 bid,
                 posterid,
                 keyword
@@ -484,7 +471,7 @@ public class PostController {
             int size = 50;
             int offset = (page - 1) * size;
             // 获取回复列表内容
-            List<Reply> replies = replyMapper.getReplyByPostId(pid, offset, size);
+            List<Reply> replies = replyService.getRepliesByPostid(pid, offset, size);
 
             return ResponseEntity.ok().body(new GetPostResponse(
                 post, 

@@ -53,6 +53,7 @@ void press_dislike() {
 
 
 ```
+TODO: 封装接口，将token都放到结构体中
 
 用户接口 全部完成
 

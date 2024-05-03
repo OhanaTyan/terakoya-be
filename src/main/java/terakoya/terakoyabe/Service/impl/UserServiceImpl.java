@@ -23,12 +23,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int getUserIdByUsername(String poster) {
+    public int getUseridByUsername(String poster) {
         User user = userMapper.getUserByUsername(poster);
         if (user == null){
             return -1;
         }
         return user.getUid();
+    }
+
+    @Override
+    public boolean isUseridExists(int userid) {
+        User user = userMapper.getUserById(userid);
+        if (user == null){
+            return false;
+        } else {
+            return true;
+        }
     }
 
     

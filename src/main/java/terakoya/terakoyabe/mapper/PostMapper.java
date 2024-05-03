@@ -1,23 +1,25 @@
 package terakoya.terakoyabe.mapper;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.*;
-
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import terakoya.terakoyabe.entity.Post;
+
+import java.util.List;
 
 @Mapper
 public interface PostMapper {
     
     
     
-    @Insert("INSERT INTO posts (id, releasetime, replytime, posterid, board, title, content, likes, dislike)  "+
-            "SELECT COALESCE(MAX(id), 0)+1, #{releaseTime}, #{replyTime}, #{posterid}, #{board}, #{title}, #{content}, #{likes}, #{dislike} " + 
+    @Insert("INSERT INTO posts (id, releasetime, replytime, posterid, board, title, content)  "+
+            "SELECT COALESCE(MAX(id), 0)+1, #{releaseTime}, #{replyTime}, #{posterid}, #{board}, #{title}, #{content} " +
             "FROM posts")
-    void insertPost(int releaseTime, int replyTime, int posterid, int board, String title, String content, int likes, int dislike);
+    void insertPost(int releaseTime, int replyTime, int posterid, int board, String title, String content);
 
     @Select("SELECT * FROM posts WHERE releasetime = #{releaseTime} AND replytime = #{replyTime}")
-    List<Post> getPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime);
+    List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime);
 
     @Select("SELECT * FROM posts WHERE id = #{id}")
     List<Post> getPostById(int id);
@@ -30,15 +32,15 @@ public interface PostMapper {
     void updatePost(int id, String title, String content, int board);
 
 
-    // 批量将 board 为 boardId 的帖子的 board 改为 0
-    @Update("UPDATE posts SET board = 0 WHERE board = #{boardId}")
-    void updateBoardToZero(int boardId);
+    // 批量将 board 为 boardid 的帖子的 board 改为 0
+    @Update("UPDATE posts SET board = 0 WHERE board = #{boardid}")
+    void updateBoardToZero(int boardid);
 
     @Select("SELECT * FROM posts ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPosts(int offset, int size);
 
-    @Select("SELECT * FROM posts WHERE board = #{boardId} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
-    List<Post> getLatestPostsByBoard(int boardId,  int offset, int size);
+    @Select("SELECT * FROM posts WHERE board = #{boardid} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
+    List<Post> getLatestPostsByBoard(int boardid,  int offset, int size);
 
     String sql =
        "WHERE "+

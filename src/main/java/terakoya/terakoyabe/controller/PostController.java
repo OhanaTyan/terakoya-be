@@ -17,7 +17,6 @@ import terakoya.terakoyabe.util.Log;
 import terakoya.terakoyabe.util.ServerError;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @CrossOrigin(origins = Setting.SOURCE_SITE, maxAge = 3600, allowCredentials = "true")
@@ -503,6 +502,10 @@ public class PostController {
     }
 
 
+    @Data
+    public static class GetPostRequest{
+        int page;
+    }
     @AllArgsConstructor
     @Data
     public static class GetPostResponse{
@@ -514,18 +517,19 @@ public class PostController {
     @PostMapping("/{pid}")
     public ResponseEntity<?> getPost(
         @PathVariable("pid") int pid,
-        @RequestBody(required = false) int pageint
+        @RequestBody(required = false) GetPostRequest data
     )
     {
         try {
-            Log.info("PostController::getPost\npid:"+pid+"\npageint:"+pageint);
+            Log.info("PostController::getPost\npid:"+pid+"\npageint:"+data.getPage());
             Post post = getPostById(pid);
             // 检查帖子是否存在
             if (post == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
             }
             int page;
-            page = Objects.requireNonNullElse(pageint, 1);
+            // page = Objects.requireNonNullElse(pageint, 1);
+            page = data.getPage();
             int size = 50;
             int offset = (page - 1) * size;
             // 获取回复列表内容

@@ -137,11 +137,11 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class EditRequest{
-        int replyid;
+        int rid;
         String  content;
         String  token;
         public String toString(){
-            return "EditRequest [replyid=" + replyid + ", content=" + content + ", token=" + token + "]";
+            return "EditRequest [replyid=" + rid + ", content=" + content + ", token=" + token + "]";
         }
     }
 
@@ -182,7 +182,7 @@ public class ReplyController {
             if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数replyid"));
             } else {
-               replyid = data.getReplyid();
+               replyid = data.getRid();
             }
             String content = data.getContent();
 
@@ -202,10 +202,10 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class DeleteRequest{
-        int replyid;
+        int rnd;
         String  token;
         public String toString(){
-            return "DeleteRequest [replyid=" + replyid + ", token=" + token + "]";
+            return "DeleteRequest [replyid=" + rid + ", token=" + token + "]";
         }
     }
 
@@ -232,7 +232,7 @@ public class ReplyController {
             if (false){
                 return ResponseEntity.status(400).body(new ErrorResponse("缺少参数replyid"));
             } else {
-               replyid = data.getReplyid();
+               replyid = data.getRid();
             }
 
             // 检查回复是否存在

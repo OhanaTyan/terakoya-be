@@ -505,6 +505,11 @@ public class PostController {
     @Data
     public static class GetPostRequest{
         int page;
+        public String toString(){
+            return "GetPostRequest{" +
+                    "page=" + page +
+                    '}';
+        }
     }
     @AllArgsConstructor
     @Data
@@ -521,7 +526,7 @@ public class PostController {
     )
     {
         try {
-            Log.info("PostController::getPost\npid:"+pid+"\npageint:"+data.getPage());
+            Log.info("PostController::getPost\npid:"+pid+"\npageint:"+data);
             Post post = getPostById(pid);
             // 检查帖子是否存在
             if (post == null){

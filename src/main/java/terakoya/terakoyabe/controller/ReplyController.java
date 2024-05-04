@@ -62,7 +62,7 @@ public class ReplyController {
         
         int replyid = replies.getFirst().getId();
         replyService.updateReplyidByPostid(replyid, postid);
-        return postid;
+        return replyid;
     }
 
     @AllArgsConstructor

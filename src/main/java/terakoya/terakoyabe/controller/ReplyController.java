@@ -202,7 +202,7 @@ public class ReplyController {
     @AllArgsConstructor
     @Data
     public static class DeleteRequest{
-        int rnd;
+        int rid;
         String  token;
         public String toString(){
             return "DeleteRequest [replyid=" + rid + ", token=" + token + "]";

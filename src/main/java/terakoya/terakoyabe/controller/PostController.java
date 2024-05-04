@@ -526,24 +526,25 @@ public class PostController {
     )
     {
         try {
-            Log.info("PostController::getPost\npid:"+pid+"\npageint:"+data);
+            if (data == null) {
+                Log.info("PostController::getPost\npid:" + pid + "\ndata:null");
+            } else {
+                Log.info("PostController::getPost\npid:" + pid + "\n" + data);
+            }
             Post post = getPostById(pid);
             // 检查帖子是否存在
             if (post == null){
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
             }
             int page;
-            // page = Objects.requireNonNullElse(pageint, 1);
-            // page = data.getPage();
             if (data == null){
                 page = 1;
             } else {
                 page = data.getPage();
             }
             int size = 50;
-            int offset = (page - 1) * size;
             // 获取回复列表内容
-            List<Reply> replies = replyService.getRepliesByPostid(pid, offset, size);
+            List<Reply> replies = replyService.getRepliesByPostid(pid, page, size);
 
             return ResponseEntity.ok().body(new GetPostResponse(
                 post, 

@@ -529,7 +529,12 @@ public class PostController {
             }
             int page;
             // page = Objects.requireNonNullElse(pageint, 1);
-            page = data.getPage();
+            // page = data.getPage();
+            if (data == null){
+                page = 1;
+            } else {
+                page = data.getPage();
+            }
             int size = 50;
             int offset = (page - 1) * size;
             // 获取回复列表内容

@@ -13,6 +13,7 @@ import terakoya.terakoyabe.Service.UserService;
 import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.entity.Reply;
 import terakoya.terakoyabe.setting.Setting;
+import terakoya.terakoyabe.util.Log;
 import terakoya.terakoyabe.util.ServerError;
 
 import java.util.List;
@@ -50,6 +51,14 @@ public class PostController {
         String title;
         String content;
         String token;
+        public String toString() {
+            return "CreateRequest{" +
+                    "board=" + board +
+                    ", title='" + title + '\'' +
+                    ", content='" + content + '\'' +
+                    ", token='" + token + '\'' +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -125,6 +134,8 @@ public class PostController {
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            Log.info("PostController::create\n"+data.toString());
+
             int posterid = TokenController.getUid(token);
 
             String title = data.getTitle();
@@ -192,6 +203,20 @@ public class PostController {
         String  title;
         String  content;
         String  token;
+
+        public String toString(){
+            return "MyPost{" +
+                    "id=" + id +
+                    ", releaseTime=" + releaseTime +
+                    ", replyTime=" + replyTime +
+                    ", posterid=" + posterid +
+                    ", board=" + board +
+                    ", title='" + title + '\'' +
+                    ", content='" + content + '\'' +
+                    ", token='" + token + '\'' +
+                    '}';
+
+        }
     }
 
     @PostMapping("/edit")
@@ -204,6 +229,8 @@ public class PostController {
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            Log.info("PostController::edit\n"+data.toString());
 
             int uid = TokenController.getUid(token);
             // 验证是否是管理用户
@@ -254,6 +281,12 @@ public class PostController {
     public static class DeleteRequest{
         int pid;
         String  token;
+        public String toString() {
+            return "DeleteRequest{" +
+                    "pid=" + pid +
+                    ", token='" + token + '\'' +
+                    '}';
+        }
     }
 
     @PostMapping("/delete")
@@ -266,6 +299,8 @@ public class PostController {
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            Log.info("PostController::delete\n"+data.toString());
             int uid = TokenController.getUid(token);
 
             // 验证是否是管理员
@@ -312,6 +347,12 @@ public class PostController {
     public static class GetLatestRequest{
         int bid;
         int page;
+        public String toString() {
+            return "GetLatestRequest{" +
+                    "bid=" + bid +
+                    ", page=" + page +
+                    '}';
+        }
     }
 
     @PostMapping("/latest")
@@ -320,6 +361,8 @@ public class PostController {
     )
     {
         try {
+            Log.info("PostController::getLatest\n"+data.toString());
+
             int bid;
             int page;
             if (data == null){
@@ -363,6 +406,15 @@ public class PostController {
         String poster;
         String keyword;
         String token;
+        public String toString() {
+            return "GetListRequest{" +
+                    "page=" + page +
+                    ", bid=" + bid +
+                    ", poster='" + poster + '\'' +
+                    ", keyword='" + keyword + '\'' +
+                    ", token='" + token + '\'' +
+                    '}';
+        }
     }
 
     @AllArgsConstructor
@@ -383,6 +435,7 @@ public class PostController {
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            Log.info("PostController::getList\n"+data.toString());
             int uid = TokenController.getUid(token);
             // 验证是否是管理员
             if (!userService.isAdmin(uid)){
@@ -465,6 +518,7 @@ public class PostController {
     )
     {
         try {
+            Log.info("PostController::getPost\npid:"+pid+"\npageint:"+pageint);
             Post post = getPostById(pid);
             // 检查帖子是否存在
             if (post == null){

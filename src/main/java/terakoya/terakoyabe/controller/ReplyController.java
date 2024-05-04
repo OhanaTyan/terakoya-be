@@ -15,6 +15,7 @@ import terakoya.terakoyabe.entity.Post;
 import terakoya.terakoyabe.entity.Reply;
 import terakoya.terakoyabe.setting.Setting;
 import terakoya.terakoyabe.util.ErrorResponse;
+import terakoya.terakoyabe.util.Log;
 import terakoya.terakoyabe.util.ServerError;
 
 import java.util.ArrayList;
@@ -76,6 +77,9 @@ public class ReplyController {
         int pid;
         String  content;
         String  token;
+        public String toString(){
+            return "CreateRequest [pid=" + pid + ", content=" + content + ", token=" + token + "]";
+        }
     }
 
     // 创建回复
@@ -90,6 +94,7 @@ public class ReplyController {
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+            Log.info("ReplyController::create" + data.toString());
 
             int uid = TokenController.getUid(token);
 
@@ -135,6 +140,9 @@ public class ReplyController {
         int replyid;
         String  content;
         String  token;
+        public String toString(){
+            return "EditRequest [replyid=" + replyid + ", content=" + content + ", token=" + token + "]";
+        }
     }
 
     public boolean isReplyExists(int replyid){
@@ -157,6 +165,7 @@ public class ReplyController {
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
             }
+            Log.info("ReplyController::edit" + data.toString());
 
             int uid = TokenController.getUid(token);
             // 验证是否是管理员
@@ -195,6 +204,9 @@ public class ReplyController {
     public static class DeleteRequest{
         int replyid;
         String  token;
+        public String toString(){
+            return "DeleteRequest [replyid=" + replyid + ", token=" + token + "]";
+        }
     }
 
     @PostMapping("/delete")
@@ -208,6 +220,8 @@ public class ReplyController {
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
             }
+            Log.info("ReplyController::delete" + data.toString());
+
             int uid = TokenController.getUid(token);
 
             // 验证是否是管理员
@@ -242,6 +256,9 @@ public class ReplyController {
         int page;
         String  poster;
         String  token;
+        public String toString(){
+            return "GetListRequest [page=" + page + ", poster=" + poster + ", token=" + token + "]";
+        }
     }
     
     @AllArgsConstructor
@@ -263,6 +280,8 @@ public class ReplyController {
             if (!TokenController.verifyToken(token)) {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));    
             }
+
+            Log.info("ReplyController::list" + data.toString());
 
             int uid = TokenController.getUid(token);
             // 验证是否是管理员

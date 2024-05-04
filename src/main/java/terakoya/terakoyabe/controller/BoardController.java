@@ -62,6 +62,8 @@ public class BoardController {
             if (!userService.isAdmin(uid)){
                 return ResponseEntity.status(403).body(new ErrorResponse("权限不足"));
             }
+            Log.info("BoardController::create\n"+data.toString());
+
             // 检查板块名字是否为空
             if (data.getName().isEmpty()){
                 return ResponseEntity.status(400).body(new ErrorResponse("板块名字为空"));
@@ -90,6 +92,9 @@ public class BoardController {
         String  name;
         String  description;
         String  token;
+        public String toString(){
+            return "bid: " + bid + ", name: " + name + ", description: " + description + ", token: " + token;
+        }
     }
 
     @PostMapping("/edit")
@@ -103,6 +108,8 @@ public class BoardController {
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            Log.info("BoardController::edit\n" + data.toString());
 
             int uid = TokenController.getUid(token);
 
@@ -162,6 +169,8 @@ public class BoardController {
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
 
+            Log.info("BoardController::delete\n" + data.toString());
+
             int uid = TokenController.getUid(token);
             // 验证是否是管理用户
             if (!userService.isAdmin(uid)){
@@ -197,6 +206,9 @@ public class BoardController {
     @Data
     public static class ListRequest{
         String token;
+        public String toString(){
+            return "token: " + token;
+        }
     }
 
     @AllArgsConstructor
@@ -217,6 +229,8 @@ public class BoardController {
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
             }
+
+            Log.info("BoardController::list\n" + data.toString());
 
             // 返回所有板块的列表
             List<Board> boards = boardService.listAllBoards();

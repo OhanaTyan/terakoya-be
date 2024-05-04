@@ -72,14 +72,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getPostsByBoardPosterAndKeyword(int bid, int posterid, String keyword, int page, int size) {
+    public List<Post> getPostsByBoardPosterAndKeyword(int boardid, int posterid, String keyword, int page, int size) {
         int offset = MyUtil.getOffset(page, size);
-        return postMapper.getPostsByBoardPosterAndKeyword(bid, posterid, keyword, offset, size);
+        return postMapper.getPostsByBoardPosterAndKeyword(boardid, posterid, keyword, offset, size);
     }
 
     @Override
     public int getPostCountByBoardPosterAndKeyword(int boardid, int posterid, String keyword) {
-        return 0;
+        return postMapper.getPostCountByBoardPosterAndKeyword(boardid, posterid, keyword);
     }
 
 }

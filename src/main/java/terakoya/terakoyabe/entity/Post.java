@@ -13,6 +13,7 @@ public class Post {
     private int replytime;      // 回复时间
     //private User    poster;
     private int posterid;
+    private String username;
     private int board;
     private String title;
     private String content;

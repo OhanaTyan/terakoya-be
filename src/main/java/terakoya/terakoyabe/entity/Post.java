@@ -14,6 +14,7 @@ public class Post {
     //private User    poster;
     private int posterid;
     private String username;
+    private int role;
     private int board;
     private String title;
     private String content;

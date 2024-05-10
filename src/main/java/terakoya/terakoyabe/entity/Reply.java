@@ -9,6 +9,7 @@ public class Reply {
     private int id;
     private int replytime;
     private int replyer;
+    private int role;
     private int postid;
     private String username;
     private String content;

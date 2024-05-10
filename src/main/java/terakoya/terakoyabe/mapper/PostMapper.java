@@ -22,7 +22,7 @@ public interface PostMapper {
     List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime);
 
     // TODO
-    @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username " +
+    @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username, role " +
             "FROM posts JOIN users ON posts.posterid = users.uid WHERE id = #{id}")
     List<Post> getPostById(int id);
 
@@ -42,7 +42,7 @@ public interface PostMapper {
     List<Post> getLatestPosts(int offset, int size);
 
     // TODO
-    @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username "+
+    @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username, role "+
             "FROM posts JOIN users ON posts.posterid = users.uid"+
             " WHERE board = #{boardid} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPostsByBoard(int boardid,  int offset, int size);
@@ -73,7 +73,7 @@ public interface PostMapper {
 
     // TODO
     @Select(
-        "SELECT posts.id, releasetime, posterid, board, title, content, replytime "+
+        "SELECT posts.id, releasetime, posterid, board, title, content, replytime, username, role "+
                 " FROM posts JOIN users ON posts.posterid = users.uid "+
         sql +
         "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}"

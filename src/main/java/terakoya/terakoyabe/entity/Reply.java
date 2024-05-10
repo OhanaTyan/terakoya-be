@@ -10,6 +10,7 @@ public class Reply {
     private int replytime;
     private int replyer;
     private int postid;
+    private String username;
     private String content;
 
 }

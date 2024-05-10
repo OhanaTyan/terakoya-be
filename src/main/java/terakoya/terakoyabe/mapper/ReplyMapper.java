@@ -23,29 +23,43 @@ public interface ReplyMapper {
     @Update("UPDATE replies SET content = #{content} WHERE id = #{replyid}")
     void updateContent(int replyid, String content);
 
-    @Select("SELECT * FROM replies WHERE postid = #{postid} ORDER BY replytime LIMIT #{size} OFFSET #{offset}")
+    // TODO
+    @Select("SELECT replies.id, replytime, replyer, content, postid, users.username "+
+            "FROM replies JOIN users ON replies.replyer = users.uid " +
+            "WHERE postid = #{postid} ORDER BY replytime LIMIT #{size} OFFSET #{offset}")
     List<Reply> getRepliesByPostid(int postid, int offset, int size);
 
     @Delete("DELETE FROM replies WHERE postid = #{postId}")
     void deleteByPostid(int postId);
-    
-    @Select("SELECT * FROM replies WHERE id = #{replyid}")
+
+    // TODO
+    @Select("SELECT replies.id, replytime, replyer, content, postid, users.username "+
+            "FROM replies JOIN users ON replies.replyer = users.uid "+
+            "WHERE id = #{replyid}")
     List<Reply> findReplyByReplyid(int replyid);
 
     @Delete("DELETE FROM replies WHERE id = #{replyid}")
     void deleteReply(int replyid);
 
-    @Select("SELECT * FROM replies ORDER BY replytime DESC LIMIT 15")
+    // TODO
+    @Select("SELECT replies.id, replytime, replyer, content, postid, users.username "+
+            "FROM replies JOIN users ON replyer = users.uid "+
+            "ORDER BY replytime DESC LIMIT 15")
     List<Reply> getLatestReplies();
 
-    @Select("SELECT * FROM replies "+
+    // TODO
+    @Select("SELECT replies.id, replytime, replyer, content, postid, users.username "+
+            "FROM replies JOIN users ON replyer = users.uid "+
             "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset} ")
     List<Reply> getAllReplies(int offset, int size);
 
     @Select("SELECT COUNT(*) FROM replies ")
     int getReplyCount();
 
-    @Select("SELECT * FROM replies WHERE replyer = #{posterid} " +
+    // TODO
+    @Select("SELECT replies.id, replytime, replyer, content, postid, users.username "+
+            "FROM replies JOIN users ON replyer = users.uid "+
+            "WHERE replyer = #{posterid} " +
             "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset} ")
     List<Reply> getRepliesByPoster(int posterid, int offset, int size);
 

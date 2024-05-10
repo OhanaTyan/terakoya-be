@@ -38,7 +38,10 @@ public interface PostMapper {
     @Update("UPDATE posts SET board = 0 WHERE board = #{boardid}")
     void updateBoardToZero(int boardid);
 
-    @Select("SELECT * FROM posts ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
+    // TODO
+    @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, users.username, users.role "+
+            "FROM posts JOIN users ON posts.posterid = users.uid "+
+            "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPosts(int offset, int size);
 
     // TODO

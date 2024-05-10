@@ -195,10 +195,11 @@ public class UserController {
             if (!isPasswordValid(password)){
                 return ResponseEntity.status(400).body(new ErrorResponse("密码不满足设定条件"));
             }
+            /*
             if (user.getPassword().equals(password)){
                 // 密码未修改
                 return ResponseEntity.status(400).body(new ErrorResponse("密码未修改"));
-            }
+            }*/
             // 修改用户信息
             userMapper.updateUser(uid, username, password, user.getRole());
 

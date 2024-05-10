@@ -23,7 +23,7 @@ public interface PostMapper {
 
     // TODO
     @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username, role " +
-            "FROM posts JOIN users ON posts.posterid = users.uid WHERE id = #{id}")
+            "FROM posts JOIN users ON posts.posterid = users.uid WHERE id = #{id} AND board != -1 ")
     List<Post> getPostById(int id);
 
     @Update("UPDATE posts SET replytime = #{replyTime} WHERE id = #{id}")
@@ -41,17 +41,20 @@ public interface PostMapper {
     // TODO
     @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, users.username, users.role "+
             "FROM posts JOIN users ON posts.posterid = users.uid "+
+            "WHERE board != -1 " +
             "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPosts(int offset, int size);
 
     // TODO
     @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, users.username, role "+
-            "FROM posts JOIN users ON posts.posterid = users.uid"+
-            " WHERE board = #{boardid} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
+            "FROM posts JOIN users ON posts.posterid = users.uid "+
+            "WHERE board = #{boardid} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPostsByBoard(int boardid,  int offset, int size);
 
     String sql =
        "WHERE "+
+                    "(board != -1)"+
+               "AND" +
                     "((#{bid} = -1) OR (board = #{bid}) )" +
                 "AND "+
                     "((#{posterid} = -1) OR (posterid = #{posterid})) "+

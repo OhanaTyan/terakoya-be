@@ -533,7 +533,7 @@ public class PostController {
             }
             Post post = getPostById(pid);
             // 检查帖子是否存在
-            if (post == null){
+            if (post == null) {
                 return ResponseEntity.status(400).body(new ErrorResponse("帖子不存在或已被删除"));
             }
             int page;

@@ -65,9 +65,9 @@ public class UserController {
                 //  return ResponseEntity.ok().body(new LoginResponse(user.getUid(), token,));
                 return ResponseEntity.ok().body(new LoginResponse(
                         user.getUid(),
-                        token,
+                        user.getUsername(),
                         user.getRole(),
-                        user.getUsername()
+                        token
                 ));
             }
         } catch(Exception e){

@@ -38,6 +38,8 @@ public class UserController {
     @Data
     public static class LoginResponse {
         int id;
+        String username;
+        int role;
         String token;
     }
 
@@ -60,7 +62,13 @@ public class UserController {
                 Log.info("登录成功，用户：" + user.toString());
                 // 打印 token 信息
                 Log.info("生成 token：" + token);
-                return ResponseEntity.ok().body(new LoginResponse(user.getUid(), token));
+                //  return ResponseEntity.ok().body(new LoginResponse(user.getUid(), token,));
+                return ResponseEntity.ok().body(new LoginResponse(
+                        user.getUid(),
+                        token,
+                        user.getRole(),
+                        user.getUsername()
+                ));
             }
         } catch(Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));

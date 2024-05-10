@@ -21,7 +21,7 @@ public interface PostMapper {
     @Select("SELECT * FROM posts WHERE releasetime = #{releaseTime} AND replytime = #{replyTime}")
     List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime);
 
-    //
+    // TODO
     @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username " +
             "FROM posts JOIN users ON posts.posterid = users.uid WHERE id = #{id}")
     List<Post> getPostById(int id);
@@ -41,7 +41,7 @@ public interface PostMapper {
     @Select("SELECT * FROM posts ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
     List<Post> getLatestPosts(int offset, int size);
 
-    //
+    // TODO
     @Select("SELECT posts.id, releasetime, posterid, board, title, content, replytime, username "+
             "FROM posts JOIN users ON posts.posterid = users.uid"+
             " WHERE board = #{boardid} ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}")
@@ -71,9 +71,9 @@ public interface PostMapper {
     int getPostCountByBoardPosterAndKeyword(int bid, int posterid, String keyword);
 
 
-    //
+    // TODO
     @Select(
-        "SELECT posts.id, releasetime, posterid, board, title, content, replytime, username"+
+        "SELECT posts.id, releasetime, posterid, board, title, content, replytime "+
                 " FROM posts JOIN users ON posts.posterid = users.uid "+
         sql +
         "ORDER BY replytime DESC LIMIT #{size} OFFSET #{offset}"

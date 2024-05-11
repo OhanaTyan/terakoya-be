@@ -318,6 +318,10 @@ public class UserController {
             int offset = (page - 1) * size;
             List<User> users = userMapper.getUserList(offset, size, keyword);
 
+            // 清除掉所有密码字段
+            for (User user : users){
+                user.setPassword(null);
+            }
 
             UserListResponse response = new UserListResponse();
             response.setPostCount(userMapper.getPostCountByUser(keyword));

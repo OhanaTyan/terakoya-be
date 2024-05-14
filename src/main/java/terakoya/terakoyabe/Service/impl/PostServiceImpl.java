@@ -84,8 +84,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findPostByReleaseTimeAndReplyTime'");
+        return postMapper.findPostByReleaseTimeAndReplyTime(releaseTime, replyTime);
     }
 
 }

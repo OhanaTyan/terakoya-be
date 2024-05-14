@@ -175,6 +175,7 @@ public class UserController {
     )
     {
         try {
+            Log.info(data.toString());
             String token = data.getToken();
             if (!TokenController.verifyToken(token)){ 
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -214,7 +215,7 @@ public class UserController {
                     return ResponseEntity.status(400).body(new ErrorResponse("密码未修改"));
                 }  
                 userMapper.updateUser(uid, username, password, user.getRole());
-                return ResponseEntity.ok("权限修改成功");
+                return ResponseEntity.status(400).body(new ErrorResponse("密码修改成功"));
             }
         } catch (Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));

@@ -48,7 +48,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime) {
+    public List<Post> findPostByRelaseTimeAndReplyTime(int releaseTime, int replyTime) {
         return postMapper.findPostByReleaseTimeAndReplyTime(releaseTime, replyTime);
     }
 
@@ -80,6 +80,12 @@ public class PostServiceImpl implements PostService {
     @Override
     public int getPostCountByBoardPosterAndKeyword(int boardid, int posterid, String keyword) {
         return postMapper.getPostCountByBoardPosterAndKeyword(boardid, posterid, keyword);
+    }
+
+    @Override
+    public List<Post> findPostByReleaseTimeAndReplyTime(int releaseTime, int replyTime) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findPostByReleaseTimeAndReplyTime'");
     }
 
 }

@@ -176,6 +176,52 @@ public class UserController {
     {
         try {
             String token = data.getToken();
+            if (!TokenController.verifyToken(token)){ 
+                return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
+            }
+            String password = data.getPassword();
+            String username = data.getUsername();
+            int uid = TokenController.getUid(token);
+            if (!isUsernameValid(username)){
+                return ResponseEntity.status(400).body(new ErrorResponse("用户名不满足设定条件"));
+            }
+            if (password == null){
+                // 只修改用户名
+                User user = userMapper.getUserByUsername(username);
+                if (user != null){
+                    if (user.getUid() == uid){
+                        return ResponseEntity.status(400).body(new ErrorResponse("用户名未修改"));
+                    } else {
+                        return ResponseEntity.status(400).body(new ErrorResponse("用户名已存在"));
+                    }
+                } else {
+                    user = userMapper.getUserById(uid);
+                    try {
+                        userMapper.updateUser(uid, username, user.getPassword(), user.getRole());
+                        return ResponseEntity.status(400).body(new ErrorResponse("用户名修改成功"));
+                    } catch (Exception e){
+                        return ResponseEntity.status(400).body(new ErrorResponse(("用户名修改失败")));
+                    }  
+                }
+            } else {
+                // 验证密码是否满足设定条件
+                if (!isPasswordValid(password)){
+                    return ResponseEntity.status(400).body(new ErrorResponse("密码不满足设定条件"));
+                }
+                User user = userMapper.getUserById(uid);
+                if (user.getPassword().equals(password)){
+                    // 密码未修改
+                    return ResponseEntity.status(400).body(new ErrorResponse("密码未修改"));
+                }  
+                userMapper.updateUser(uid, username, password, user.getRole());
+                return ResponseEntity.ok("权限修改成功");
+            }
+        } catch (Exception e){
+            return ResponseEntity.status(500).body(new ServerError(e));
+        }
+        /* 
+        try {
+            String token = data.getToken();
             // 验证 token
             if (!TokenController.verifyToken(token)){
                 return ResponseEntity.status(401).body(new ErrorResponse("token 验证失败，请重新登录"));
@@ -207,7 +253,7 @@ public class UserController {
             if (user.getPassword().equals(password)){
                 // 密码未修改
                 return ResponseEntity.status(400).body(new ErrorResponse("密码未修改"));
-            }*/
+            }
             // 修改用户信息
             userMapper.updateUser(uid, username, password, user.getRole());
 
@@ -215,8 +261,9 @@ public class UserController {
             return ResponseEntity.ok("权限修改成功");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ServerError(e));
-        }
+        }*/
     }
+    
 
     @AllArgsConstructor
     @Data

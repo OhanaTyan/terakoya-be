@@ -66,5 +66,9 @@ public interface ReplyMapper {
     @Select("SELECT COUNT(*) FROM replies WHERE replyer = #{posterid} " )
     int getReplyCountByPosterid(int posterid);
 
+    // TODO 需要测试
+    @Select("SELECT COUNT(*) FROM replies WHERE postid = #{pid}")
+    int getReplyCountByPostid(int pid);
+
 
 }

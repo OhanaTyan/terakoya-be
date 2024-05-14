@@ -545,10 +545,10 @@ public class PostController {
             int size = 50;
             // 获取回复列表内容
             List<Reply> replies = replyService.getRepliesByPostid(pid, page, size);
-
+            int allSize = replyService.getReplyCountByPostid(pid);
             return ResponseEntity.ok().body(new GetPostResponse(
                 post, 
-                replies.size(),
+                allSize,
                 replies
             ));
         } catch (Exception e) {

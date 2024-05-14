@@ -78,5 +78,10 @@ public class ReplyServiceImpl implements ReplyService {
         replyMapper.deleteByPostid(postid);
     }
 
+    @Override
+    public int getReplyCountByPostid(int pid) {
+        return replyMapper.getReplyCountByPostid(pid);
+    }
+
 
 }

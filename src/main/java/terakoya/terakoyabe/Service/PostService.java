@@ -25,4 +25,6 @@ public interface PostService {
 	List<Post> getPostsByBoardPosterAndKeyword(int bid, int posterid, String keyword, int page, int size);
 
 	int getPostCountByBoardPosterAndKeyword(int boardid, int posterid, String keyword);
+
+	public List<Post> findPostByRelaseTimeAndReplyTime(int releaseTime, int replyTime);
 }

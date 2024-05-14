@@ -197,12 +197,8 @@ public class UserController {
                     }
                 } else {
                     user = userMapper.getUserById(uid);
-                    try {
-                        userMapper.updateUser(uid, username, user.getPassword(), user.getRole());
-                        return ResponseEntity.status(400).body(new ErrorResponse("用户名修改成功"));
-                    } catch (Exception e){
-                        return ResponseEntity.status(400).body(new ErrorResponse(("用户名修改失败")));
-                    }  
+                    userMapper.updateUser(uid, username, user.getPassword(), user.getRole());
+                    return ResponseEntity.ok("用户名修改成功");
                 }
             } else {
                 // 验证密码是否满足设定条件
@@ -214,8 +210,22 @@ public class UserController {
                     // 密码未修改
                     return ResponseEntity.status(400).body(new ErrorResponse("密码未修改"));
                 }  
+                // 验证用户名是否满足条件
+                User userWithNewUsername = userMapper.getUserByUsername(username);
+                if (userWithNewUsername == null){
+                    // do nothing
+                } else if (userWithNewUsername.getUid() == uid){
+                    // 说明该用户就是自己
+                    // do nothing
+                }  else {
+                    return ResponseEntity.status(400).body(new ErrorResponse("用户名已存在"));
+                }
                 userMapper.updateUser(uid, username, password, user.getRole());
-                return ResponseEntity.status(400).body(new ErrorResponse("密码修改成功"));
+                if (userWithNewUsername.getUid() == uid){
+                    return ResponseEntity.ok("密码修改成功");
+                } else {
+                    return ResponseEntity.ok("用户名和密码修改成功");
+                }
             }
         } catch (Exception e){
             return ResponseEntity.status(500).body(new ServerError(e));

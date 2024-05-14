@@ -221,10 +221,10 @@ public class UserController {
                     return ResponseEntity.status(400).body(new ErrorResponse("用户名已存在"));
                 }
                 userMapper.updateUser(uid, username, password, user.getRole());
-                if (userWithNewUsername.getUid() == uid){
-                    return ResponseEntity.ok("密码修改成功");
-                } else {
+                if (userWithNewUsername == null){
                     return ResponseEntity.ok("用户名和密码修改成功");
+                } else {
+                    return ResponseEntity.ok("密码修改成功");
                 }
             }
         } catch (Exception e){
